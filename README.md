@@ -20,7 +20,7 @@ Optional: update automatically the community-wiki answer posted when the burnina
 
 ###`@burnaki stop tag [tag]`
 
-This command end the burnination process of the tag given tag. No new notifications will be sent.
+This command ends the burnination process of the given tag. No new notifications will be sent.
 
 ##Notifications
 
