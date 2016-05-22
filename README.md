@@ -6,7 +6,7 @@ It also involves a chat bot that posts notification in dedicated chat rooms.
 
 ###`@burnaki start tag [tag] [link to Meta] [rooms]...`
 
-This command starts the burnination process of the given tag. All questions with that tag will be queried from SE API and stored in a database. The bot will send notification to the configured chat rooms about actions made to those questions.
+This command starts the burnination process of the given tag. All questions with that tag will be queried from SE API and stored in memory. The bot will send notification to the configured chat rooms about actions made to those questions.
 
 Optional: post automatically a community-wiki answer with a predefined-template?
 
@@ -34,3 +34,8 @@ During a burnination process, notifications will be sent to the configured chat 
 ##Web interface
 
 Print nice progress graphs?
+
+##Database schema
+
+Burnination(Tag, StartDate, EndDate, MetaLink, Rooms)
+BurninationProgress(#Burnination, DateTime, TotalQuestions, Open, Retagged, ClosedNotDeleted, Roombad, ManuallyDeleted)
