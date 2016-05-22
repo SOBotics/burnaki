@@ -37,5 +37,5 @@ Print nice progress graphs?
 
 ##Database schema
 
-Burnination(Tag, StartDate, EndDate, MetaLink, Rooms)
-BurninationProgress(#Burnination, DateTime, TotalQuestions, Open, Retagged, ClosedNotDeleted, Roombad, ManuallyDeleted)
+ - Burnination(Tag, StartDate, EndDate, MetaLink, Rooms)
+ - BurninationProgress(#Burnination, DateTime, TotalQuestions, Open, Retagged, ClosedNotDeleted, Roombad, ManuallyDeleted)
