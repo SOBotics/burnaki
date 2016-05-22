@@ -4,26 +4,19 @@ It also involves a chat bot that posts notification in dedicated chat rooms.
 
 ##Chat bot
 
-###`@burnaki start tag [tag] [rooms]...`
+###`@burnaki start tag [tag] [link to Meta] [rooms]...`
 
-This command starts the burnination process of the given tag. All questions with that tag from SE API will be queried and stored in a database. The bot will send notification to the configured chat rooms about actions made to those questions.
+This command starts the burnination process of the given tag. All questions with that tag will be queried from SE API and stored in a database. The bot will send notification to the configured chat rooms about actions made to those questions.
 
-###`@burnaki add room [room]`
+Optional: post automatically a community-wiki answer with a predefined-template?
 
-This command adds the given chat room to the list of current configured chat rooms for the burnination effort in progress.
-
-###`@burnaki remove room [room]`
-
-This command removes the given chat room to the list of current configured chat rooms for the burnination effort in progress.
-
-###`@burnaki get progress`
+###`@burnaki get progress [tag]`
 
 This command outputs the current progress of the burnination: number of opened questions / number of closed questions / number of questions with close-votes / number of questions with delete-votes.
 
-###`@burnaki update progress [link to community-wiki]`
+###`@burnaki update progress [tag]`
 
-When a burnination effort is started and a community-wiki answer has been posted to track the progress on Meta, this command will 
-edit the answer with the current progress.
+Optional: update automatically the community-wiki answer posted when the burnination started?
 
 ###`@burnaki stop tag [tag]`
 
