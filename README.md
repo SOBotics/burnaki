@@ -41,5 +41,5 @@ Print nice progress graphs?
 ##Database schema
 
  - Burnination(Tag, StartDate, EndDate, MetaLink, Rooms)
- - BurninationQuestions(#Burnination, QuestionId, CloseVoteCount, ReopenVoteCount, DeleteVoteCount) - This table is a snapshot of all the questions at the start of the burnination and serves as base for notifications.
+ - BurninationQuestions(#Burnination, QuestionId, CreatedDate, CloseVoteCount, ReopenVoteCount, DeleteVoteCount) - This table is a snapshot of all the questions at the start of the burnination and serves as base for notifications.
  - BurninationProgress(#Burnination, DateTime, TotalQuestions, Open, Retagged, ClosedNotDeleted, Roombad, ManuallyDeleted)
