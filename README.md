@@ -43,4 +43,5 @@ Print nice progress graphs?
 
  - Burnination(Id, Tag, StartDate, EndDate, MetaLink, Rooms) - This table holds meta-data for the tag burnination itself.
  - BurninationQuestion(#Burnination, QuestionId, CreatedDate, CloseVoteCount, ReopenVoteCount, DeleteVoteCount, UndeleteVoteCount, Closed, Roombad, ManuallyDeleted, Retagged) - This table is a snapshot of the state of all the questions at the current date and serves as base for notifications.
+ - BurninationQuestionHistory(#BurninationQuestion, EventDate, EventType) - This table holds the history for a given question in a tag under burnination. The events corresponds to closed / retagged / deleted and so on.
  - BurninationProgress(#Burnination, ProgressDate, TotalQuestions, Closed, Roombad, ManuallyDeleted, Retagged) - This table holds the progress made at a given date. It will be updated automatically based on the current state of BurninationQuestion.
