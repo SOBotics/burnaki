@@ -30,6 +30,7 @@ During a burnination process, notifications will be sent to the configured chat 
  - When a reopen vote is cast on a closed question. This means that the question was potentially wrongly closed during the effort and needs to be re-reviewed.
  - When an edit is made to a question. This helps to track which questions were edited by whom and potentially warn wrong edits or users on an edit-spree. Focus only on tag edits removing the burning tag?
  - When a delete vote is cast on a closed question.
+ - When a new question is posted in the tags currently in burnination.
 
 Notifications will be sent by batches every 5 (?) minutes.
 
