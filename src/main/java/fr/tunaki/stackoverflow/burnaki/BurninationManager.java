@@ -1,11 +1,14 @@
-package fr.tunaki.stackoverflow.burnaki.scheduler;
+package fr.tunaki.stackoverflow.burnaki;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -18,6 +21,8 @@ import org.springframework.stereotype.Component;
 
 import fr.tunaki.stackoverflow.burnaki.entity.BurninationProgress;
 import fr.tunaki.stackoverflow.burnaki.service.BurninationService;
+import fr.tunaki.stackoverflow.burnaki.service.BurninationUpdateEvent;
+import fr.tunaki.stackoverflow.burnaki.service.BurninationUpdateListener;
 
 @Component
 public class BurninationManager implements Closeable, InitializingBean {
@@ -26,15 +31,22 @@ public class BurninationManager implements Closeable, InitializingBean {
 	
 	private BurninationService burninationService;
 	private ScheduledExecutorService executorService;
-	private BurninationSchedulerProperties properties;
+	private BurninationManagerProperties properties;
+	
+	private ExecutorService listenerExecutor = Executors.newCachedThreadPool();
+	private List<BurninationUpdateListener> listeners = new ArrayList<>();
 	
 	private Map<String, List<ScheduledFuture<?>>> tasks = new ConcurrentHashMap<>();
 	
 	@Autowired
-	public BurninationManager(ScheduledExecutorService executorService, BurninationService burninationService, BurninationSchedulerProperties properties) {
+	public BurninationManager(ScheduledExecutorService executorService, BurninationService burninationService, BurninationManagerProperties properties) {
 		this.executorService = executorService;
 		this.burninationService = burninationService;
 		this.properties = properties;
+	}
+	
+	public void addListener(BurninationUpdateListener listener) {
+		listeners.add(listener);
 	}
 	
 	@Override
@@ -42,9 +54,10 @@ public class BurninationManager implements Closeable, InitializingBean {
 		burninationService.getTagsInBurnination().forEach(this::scheduleTasks);
 	}
 
-	public void start(String tag, int roomId, String metaLink) {
-		burninationService.start(tag, roomId, metaLink);
+	public int start(String tag, int roomId, String metaLink) {
+		int size = burninationService.start(tag, roomId, metaLink);
 		scheduleTasks(tag);
+		return size;
 	}
 
 	private void scheduleTasks(String tag) {
@@ -52,7 +65,10 @@ public class BurninationManager implements Closeable, InitializingBean {
 		int refreshQuestionsEvery = properties.getRefreshQuestionsEvery();
 		int refreshProgressEvery = properties.getRefreshProgressEvery();
 		tasks.computeIfAbsent(tag, t -> Arrays.asList(
-			executorService.scheduleAtFixedRate(() -> burninationService.update(t, refreshQuestionsEvery), refreshQuestionsEvery, refreshQuestionsEvery, TimeUnit.MINUTES),
+			executorService.scheduleAtFixedRate(() -> {
+				List<BurninationUpdateEvent> events = burninationService.update(t, refreshQuestionsEvery);
+				listeners.forEach(l -> listenerExecutor.submit(() -> l.onUpdate(events)));
+			}, refreshQuestionsEvery, refreshQuestionsEvery, TimeUnit.MINUTES),
 			executorService.scheduleAtFixedRate(() -> burninationService.updateProgress(t), refreshProgressEvery, refreshProgressEvery, TimeUnit.MINUTES)
 		));
 	}
@@ -80,6 +96,7 @@ public class BurninationManager implements Closeable, InitializingBean {
 	@Override
 	public void close() throws IOException {
 		executorService.shutdownNow();
+		listenerExecutor.shutdownNow();
 	}
 
 }

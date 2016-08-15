@@ -2,6 +2,7 @@ package fr.tunaki.stackoverflow.burnaki.service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -38,7 +39,7 @@ public class BurninationService {
 		this.apiService = apiService;
 	}
 	
-	public void start(String tag, int roomId, String metaLink) {
+	public int start(String tag, int roomId, String metaLink) {
 		Objects.requireNonNull(tag, "A tag must be given");
 		Objects.requireNonNull(metaLink, "A link to a Meta post must be given");
 		LOGGER.info("Starting the burnination of tag [{}]", tag);
@@ -55,26 +56,31 @@ public class BurninationService {
 			burnination.addQuestion(burninationQuestion);
 			populateBurninationQuestion(question, burninationQuestion, tag);
 		}
+		int size = burnination.getQuestions().size();
 		repository.save(burnination);
+		return size;
 	}
 	
-	public void update(String tag, int refreshEvery) {
+	public List<BurninationUpdateEvent> update(String tag, int refreshEvery) {
 		Burnination burnination = getCurrentBurninationForTag(tag);
 		LOGGER.debug("Updating the burnination of tag [{}]", tag);
+		List<BurninationUpdateEvent> events = new ArrayList<>();
 		Map<Integer, BurninationQuestion> presentMap = burnination.getQuestions().stream().collect(Collectors.toMap(bq -> bq.getId().getQuestionId(), Function.identity()));
 		// update questions in the current burn list
 		for (Question question : apiService.getQuestionsWithIds(presentMap.keySet())) {
 			BurninationQuestion burninationQuestion = presentMap.get(question.getId());
-			populateBurninationQuestion(question, burninationQuestion, tag);
+			events.addAll(populateBurninationQuestion(question, burninationQuestion, tag));
 		}
 		// add to burn list new questions posted in burn tag since last refresh
 		for (Question question : apiService.getQuestionsInTag(tag, Instant.now().minus(refreshEvery, ChronoUnit.MINUTES)).stream().filter(q -> !presentMap.containsKey(q.getId())).collect(Collectors.toList())) {
 			LOGGER.debug("New question with id {} asked in tag under burnination [{}]", question.getId(), tag);
 			BurninationQuestion burninationQuestion = new BurninationQuestion(burnination, question.getId());
 			burnination.addQuestion(burninationQuestion);
+			events.add(new BurninationUpdateEvent(BurninationUpdateEvent.Event.NEW, tag, question));
 			populateBurninationQuestion(question, burninationQuestion, tag);
 		}
 		repository.save(burnination);
+		return events;
 	}
 	
 	public void updateProgress(String tag) {
@@ -118,12 +124,14 @@ public class BurninationService {
 		return repository.findByEndDateNull().collect(Collectors.toMap(Burnination::getRoomId, Burnination::getTag));
 	}
 
-	private void populateBurninationQuestion(Question question, BurninationQuestion burninationQuestion, String tag) {
+	private List<BurninationUpdateEvent> populateBurninationQuestion(Question question, BurninationQuestion burninationQuestion, String tag) {
+		List<BurninationUpdateEvent> events = new ArrayList<>();
 		burninationQuestion.setCreatedDate(question.getCreatedDate());
 		
 		if (question.getClosedDate() != null) {
 			if (!burninationQuestion.isClosed()) {
 				burninationQuestion.addHistory(new BurninationQuestionHistory(burninationQuestion, "CLOSED", question.getClosedDate()));
+				events.add(new BurninationUpdateEvent(BurninationUpdateEvent.Event.CLOSED, tag, question));
 			}
 			burninationQuestion.setClosed(true);
 		} else {
@@ -134,8 +142,16 @@ public class BurninationService {
 		}
 		
 		burninationQuestion.setCloseVoteCount(question.getCloseVoteCount());
+		if (question.getReopenVoteCount() == 1 && burninationQuestion.getReopenVoteCount() == 0) {
+			events.add(new BurninationUpdateEvent(BurninationUpdateEvent.Event.REOPEN_VOTE, tag, question));
+		}
+		
 		burninationQuestion.setReopenVoteCount(question.getReopenVoteCount());
 		burninationQuestion.setDeleteVoteCount(question.getDeleteVoteCount());
+		
+		if (question.getUndeleteVoteCount() == 1 && burninationQuestion.getUndeleteVoteCount() == 0) {
+			events.add(new BurninationUpdateEvent(BurninationUpdateEvent.Event.UNDELETE_VOTE, tag, question));
+		}
 		burninationQuestion.setUndeleteVoteCount(question.getUndeleteVoteCount());
 		
 		if (question.hasTag(tag)) {
@@ -146,6 +162,7 @@ public class BurninationService {
 		} else {
 			if (!burninationQuestion.isRetagged()) {
 				burninationQuestion.addHistory(new BurninationQuestionHistory(burninationQuestion, "RETAGGED WITHOUT", Instant.now()));
+				events.add(new BurninationUpdateEvent(BurninationUpdateEvent.Event.RETAGGED_WITHOUT, tag, question));
 			}
 			burninationQuestion.setRetagged(true);
 		}
@@ -154,12 +171,14 @@ public class BurninationService {
 			if (question.isRoombad()) {
 				if (!burninationQuestion.isRoombad()) {
 					burninationQuestion.addHistory(new BurninationQuestionHistory(burninationQuestion, "ROOMBAD", Instant.now()));
+					events.add(new BurninationUpdateEvent(BurninationUpdateEvent.Event.DELETED, tag, question));
 				}
 				burninationQuestion.setRoombad(true);
 				burninationQuestion.setManuallyDeleted(false);
 			} else {
 				if (!burninationQuestion.isManuallyDeleted()) {
 					burninationQuestion.addHistory(new BurninationQuestionHistory(burninationQuestion, "MANUALLY DELETED", Instant.now()));
+					events.add(new BurninationUpdateEvent(BurninationUpdateEvent.Event.DELETED, tag, question));
 				}
 				burninationQuestion.setRoombad(false);
 				burninationQuestion.setManuallyDeleted(true);
@@ -171,6 +190,7 @@ public class BurninationService {
 			burninationQuestion.setManuallyDeleted(false);
 			burninationQuestion.setRoombad(false);
 		}
+		return events;
 	}
 
 	private Burnination getCurrentBurninationForTag(String tag) {

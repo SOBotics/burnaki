@@ -2,6 +2,7 @@ package fr.tunaki.stackoverflow.burnaki.bot;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -12,20 +13,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
 
+import fr.tunaki.stackoverflow.burnaki.BurninationManager;
 import fr.tunaki.stackoverflow.burnaki.api.StackExchangeAPIService;
 import fr.tunaki.stackoverflow.burnaki.entity.BurninationProgress;
-import fr.tunaki.stackoverflow.burnaki.scheduler.BurninationManager;
+import fr.tunaki.stackoverflow.burnaki.service.BurninationUpdateEvent;
+import fr.tunaki.stackoverflow.burnaki.service.BurninationUpdateListener;
 import fr.tunaki.stackoverflow.chat.Room;
 import fr.tunaki.stackoverflow.chat.StackExchangeClient;
 import fr.tunaki.stackoverflow.chat.event.EventType;
 
 @Component
-public class BurnakiBot implements Closeable, InitializingBean {
+public class Burnaki implements Closeable, InitializingBean, BurninationUpdateListener {
 	
 	private static final String HOST = "stackoverflow.com";
 	private static final int HQ_ROOM_ID = 111347; 
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(BurnakiBot.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(Burnaki.class);
 	
 	private StackExchangeClient client;
 	private StackExchangeAPIService apiService;
@@ -34,6 +37,7 @@ public class BurnakiBot implements Closeable, InitializingBean {
 	
 	private Room hqRoom;
 	private Map<Integer, BurnRoom> burnRooms;
+	private Map<String, Integer> tagsMap;
 	
 	static final class BurnRoom {
 		
@@ -48,7 +52,7 @@ public class BurnakiBot implements Closeable, InitializingBean {
 	}
 	
 	@Autowired
-	public BurnakiBot(StackExchangeClient client, StackExchangeAPIService apiService, BurninationManager burninationScheduler, ConfigurableApplicationContext context) {
+	public Burnaki(StackExchangeClient client, StackExchangeAPIService apiService, BurninationManager burninationScheduler, ConfigurableApplicationContext context) {
 		this.client = client;
 		this.apiService = apiService;
 		this.burninationManager = burninationScheduler;
@@ -111,8 +115,8 @@ public class BurnakiBot implements Closeable, InitializingBean {
 				return;
 			}
 			try {
-				burninationManager.start(tag, roomId, tokens[2]);
-				hqRoom.replyTo(messageId, "Burnination of tag \\[" + tag + "\\] correctly started! Have fun!");
+				int size = burninationManager.start(tag, roomId, tokens[2]);
+				hqRoom.replyTo(messageId, "Burnination of tag \\[" + tag + "\\] correctly started! Have fun, " + size + " questions to go!");
 			} catch (Exception e) {
 				LOGGER.error("Cannot start burnination of tag [{}]", tag, e);
 				hqRoom.replyTo(messageId, "Cannot start burnination of tag \\[" + tag + "\\]: " + e.getMessage());
@@ -180,11 +184,33 @@ public class BurnakiBot implements Closeable, InitializingBean {
 	}
 
 	@Override
+	public void onUpdate(List<BurninationUpdateEvent> events) {
+		if (!events.isEmpty()) {
+			StringBuilder message = new StringBuilder("New notifications for the burn team!\n");
+			BurnRoom burnRoom = burnRooms.get(tagsMap.get(events.get(0).getTag()));
+			for (BurninationUpdateEvent event : events) {
+				switch (event.getEvent()) {
+				case CLOSED: message.append(" This question has been closed by the burn team: " + event.getQuestion().getLink() + ".\n"); break;
+				case UNDELETE_VOTE: message.append(" This question has received an undelete vote, please review it again: " + event.getQuestion().getLink() + ".\n"); break;
+				case DELETED: message.append(" This question has been deleted, please review it again: " + event.getQuestion().getLink() + ".\n"); break;
+				case NEW: message.append(" This question has just been posted in the burn tag: " + event.getQuestion().getLink() + ".\n"); break;
+				case REOPEN_VOTE: message.append(" This question has received a reopen vote, please review it again: " + event.getQuestion().getLink() + ".\n"); break;
+				case RETAGGED_WITHOUT: message.append(" This question has had the burn tag removed, please review it again: " + event.getQuestion().getLink() + ".\n"); break;
+				}
+			}
+			burnRoom.room.send(message.toString());
+		}
+	}
+
+	@Override
 	public void afterPropertiesSet() throws Exception {
 		hqRoom = client.joinRoom(HOST, HQ_ROOM_ID);
-		burnRooms = burninationManager.getBurnRooms().entrySet().stream().filter(e -> e.getKey() != HQ_ROOM_ID).collect(Collectors.toMap(Map.Entry::getKey, e -> new BurnRoom(client.joinRoom(HOST, e.getKey()), e.getValue())));
+		Map<Integer, String> idToTag = burninationManager.getBurnRooms();
+		burnRooms = idToTag.entrySet().stream().filter(e -> e.getKey() != HQ_ROOM_ID).collect(Collectors.toMap(Map.Entry::getKey, e -> new BurnRoom(client.joinRoom(HOST, e.getKey()), e.getValue())));
+		tagsMap = idToTag.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
 		registerEventListeners(hqRoom);
 		burnRooms.forEach((k, v) -> registerEventListeners(v.room));
+		burninationManager.addListener(this);
 	}
 
 	@Override

@@ -1,9 +1,9 @@
-package fr.tunaki.stackoverflow.burnaki.scheduler;
+package fr.tunaki.stackoverflow.burnaki;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties("burnination.scheduler")
-public class BurninationSchedulerProperties {
+public class BurninationManagerProperties {
 	
 	private int refreshQuestionsEvery;
 	private int refreshProgressEvery;
