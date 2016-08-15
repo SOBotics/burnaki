@@ -46,6 +46,9 @@ public class BurninationService {
 		if (repository.findByTagAndEndDateNull(tag).isPresent()) {
 			throw new BurnakiException("A burnination of " + tag + " is already on-going.");
 		}
+		if (repository.findByRoomIdAndEndDateNull(roomId).isPresent()) {
+			throw new BurnakiException("A burnination is already under taken by room " + roomId + ". One room can only handle one burnination.");
+		}
 		Burnination burnination = new Burnination();
 		burnination.setTag(tag);
 		burnination.setStartDate(Instant.now());
