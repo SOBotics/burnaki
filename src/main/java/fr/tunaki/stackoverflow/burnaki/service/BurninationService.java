@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,11 +30,13 @@ public class BurninationService {
 	
 	private BurninationRepository repository;
 	private StackExchangeAPIService apiService;
+	private int refreshEvery;
 	
 	@Autowired
-	public BurninationService(BurninationRepository repository, StackExchangeAPIService apiService) {
+	public BurninationService(BurninationRepository repository, StackExchangeAPIService apiService, @Value("${burnination.refreshEvery}") int refreshEvery) {
 		this.repository = repository;
 		this.apiService = apiService;
+		this.refreshEvery = refreshEvery;
 	}
 	
 	public void start(String tag, int roomId, String metaLink) {
@@ -60,13 +63,13 @@ public class BurninationService {
 		Burnination burnination = getCurrentBurninationForTag(tag);
 		LOGGER.debug("Updating the burnination of tag [{}]", tag);
 		Map<Integer, BurninationQuestion> presentMap = burnination.getQuestions().stream().collect(Collectors.toMap(bq -> bq.getId().getQuestionId(), Function.identity()));
-		// update questions in the current burn list 
+		// update questions in the current burn list
 		for (Question question : apiService.getQuestionsWithIds(presentMap.keySet())) {
 			BurninationQuestion burninationQuestion = presentMap.get(question.getId());
 			populateBurninationQuestion(question, burninationQuestion, tag);
 		}
-		// add new questions posted since last refresh to burn list
-		for (Question question : apiService.getQuestionsInTag(tag, Instant.now().minus(5, ChronoUnit.MINUTES)).stream().filter(q -> !presentMap.containsKey(q.getId())).collect(Collectors.toList())) {
+		// add to burn list new questions posted in burn tag since last refresh
+		for (Question question : apiService.getQuestionsInTag(tag, Instant.now().minus(refreshEvery, ChronoUnit.MINUTES)).stream().filter(q -> !presentMap.containsKey(q.getId())).collect(Collectors.toList())) {
 			LOGGER.debug("New question with id {} asked in tag under burnination [{}]", question.getId(), tag);
 			BurninationQuestion burninationQuestion = new BurninationQuestion(burnination, question.getId());
 			burnination.addQuestion(burninationQuestion);
