@@ -186,16 +186,17 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 	@Override
 	public void onUpdate(List<BurninationUpdateEvent> events) {
 		if (!events.isEmpty()) {
-			StringBuilder message = new StringBuilder("New notifications for the burn team!\n");
+			StringBuilder message = new StringBuilder("Hear, hear, new notifications for the burn team!\n");
 			BurnRoom burnRoom = burnRooms.get(tagsMap.get(events.get(0).getTag()));
 			for (BurninationUpdateEvent event : events) {
+				String link = event.getQuestion().getLink();
 				switch (event.getEvent()) {
-				case CLOSED: message.append(" This question has been closed by the burn team: " + event.getQuestion().getLink() + ".\n"); break;
-				case UNDELETE_VOTE: message.append(" This question has received an undelete vote, please review it again: " + event.getQuestion().getLink() + ".\n"); break;
-				case DELETED: message.append(" This question has been deleted, please review it again: " + event.getQuestion().getLink() + ".\n"); break;
-				case NEW: message.append(" This question has just been posted in the burn tag: " + event.getQuestion().getLink() + ".\n"); break;
-				case REOPEN_VOTE: message.append(" This question has received a reopen vote, please review it again: " + event.getQuestion().getLink() + ".\n"); break;
-				case RETAGGED_WITHOUT: message.append(" This question has had the burn tag removed, please review it again: " + event.getQuestion().getLink() + ".\n"); break;
+				case CLOSED: message.append(" This question has been closed by the burn team: " + link + ".\n"); break;
+				case UNDELETE_VOTE: message.append(" This question has received an undelete vote, please review it again: " + link + ".\n"); break;
+				case DELETED: message.append(" This question has been deleted, please review it again: " + link + ".\n"); break;
+				case NEW: message.append(" This question has just been posted in the burn tag: " + link + ".\n"); break;
+				case REOPEN_VOTE: message.append(" This question has received a reopen vote, please review it again: " + link + ".\n"); break;
+				case RETAGGED_WITHOUT: message.append(" This question has had the burn tag removed, please review it again: " + link + ".\n"); break;
 				}
 			}
 			burnRoom.room.send(message.toString());
