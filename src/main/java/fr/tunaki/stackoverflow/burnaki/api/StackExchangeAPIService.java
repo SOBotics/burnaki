@@ -21,6 +21,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import fr.tunaki.stackoverflow.burnaki.BurnakiException;
+
 @Component
 public class StackExchangeAPIService {
 	
@@ -41,6 +43,9 @@ public class StackExchangeAPIService {
 	}
 	
 	private List<Question> getQuestionsWithTag(String tag, Instant from, int page) {
+		if (page > properties.getMaxPage()) {
+			throw new BurnakiException("Too many pages for tag [" + tag + "], stopped at page " + page);
+		}
 		LOGGER.debug("Retrieving all questions tagged [{}], page {}", tag, page);
 		try {
 			JsonObject root;
@@ -56,8 +61,7 @@ public class StackExchangeAPIService {
 			}
 			return questions;
 		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
+			throw new BurnakiException("Cannot fetch questions with tag", e);
 		}
 	}
 
@@ -65,6 +69,17 @@ public class StackExchangeAPIService {
 		LOGGER.debug("Retrieving all questions with ids '{}'", ids);
 		List<String> idsStr = ids.stream().map(Object::toString).collect(unorderedBatchesWith(100, Collectors.joining(";")));
 		return idsStr.stream().flatMap(s -> getQuestionsWithIds(s, 1).stream()).collect(Collectors.toList());
+	}
+	
+	public boolean isValidTag(String tag) {
+		LOGGER.debug("Checking if [{}] is a valid tag", tag);
+		try {
+			JsonObject root = get("/tags/" + tag + "/info");
+			return root.get("items").getAsJsonArray().size() > 0;
+		} catch (IOException e) {
+			throw new BurnakiException("Cannot fetch tags", e);
+		}
+		
 	}
 	
 	private List<Question> getQuestionsWithIds(String ids, int page) {
@@ -78,8 +93,7 @@ public class StackExchangeAPIService {
 			}
 			return questions;
 		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
+			throw new BurnakiException("Cannot fetch questions with ids", e);
 		}
 	}
 

@@ -4,7 +4,7 @@ It also involves a chat bot that posts notification in dedicated chat rooms.
 
 ##Chat bot
 
-###`@burnaki start tag [tag] [link to Meta] [room]`
+###`@burnaki start tag [tag] [roomId] [link to Meta]`
 
 This command starts the burnination process of the given tag. All questions with that tag will be queried from SE API and stored in memory. The bot will send notification to the configured chat rooms about actions made to those questions.
 

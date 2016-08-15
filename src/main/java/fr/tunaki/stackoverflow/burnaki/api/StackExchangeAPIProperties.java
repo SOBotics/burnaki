@@ -29,6 +29,11 @@ public class StackExchangeAPIProperties {
 	 * Page size of queried results.
 	 */
 	private String pageSize;
+	
+	/**
+	 * Maximum number of pages of questions to return.
+	 */
+	private int maxPage;
 
 	public String getSite() {
 		return site;
@@ -68,6 +73,14 @@ public class StackExchangeAPIProperties {
 
 	public void setPageSize(String pageSize) {
 		this.pageSize = pageSize;
+	}
+
+	public int getMaxPage() {
+		return maxPage;
+	}
+
+	public void setMaxPage(int maxPage) {
+		this.maxPage = maxPage;
 	}
 
 }

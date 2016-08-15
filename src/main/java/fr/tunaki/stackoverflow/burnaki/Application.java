@@ -10,11 +10,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import fr.tunaki.stackoverflow.burnaki.api.StackExchangeAPIProperties;
-import fr.tunaki.stackoverflow.burnaki.scheduler.BurninationScheduler;
 import fr.tunaki.stackoverflow.burnaki.scheduler.BurninationSchedulerProperties;
+import fr.tunaki.stackoverflow.chat.StackExchangeClient;
 
 @SpringBootApplication
 @EnableConfigurationProperties({StackExchangeAPIProperties.class, BurninationSchedulerProperties.class})
@@ -25,15 +26,20 @@ public class Application {
 
 	public static void main(String[] args) {
 		ConfigurableApplicationContext context = SpringApplication.run(Application.class);
-		BurninationScheduler scheduler = context.getBean(BurninationScheduler.class);
-		scheduler.start("godaddy", 123, "http");
-		scheduler.stop("godaddy");
-		context.close();
+//		BurninationScheduler scheduler = context.getBean(BurninationScheduler.class);
+//		scheduler.start("godaddy", 123, "http");
+//		scheduler.stop("godaddy");
+//		context.close();
 	}
 	
 	@Bean
 	public ScheduledExecutorService scheduledExecutorService() {
 		return Executors.newSingleThreadScheduledExecutor();
+	}
+	
+	@Bean
+	public StackExchangeClient stackExchangeClient(Environment environment) {
+		return new StackExchangeClient(environment.getProperty("stachexchange.chat.email"), environment.getProperty("stachexchange.chat.password"));
 	}
 
 }
