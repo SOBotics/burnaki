@@ -5,12 +5,14 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -39,10 +41,10 @@ public class Burnination implements Serializable {
 	@Column(name = "room_id", nullable = false)
 	private int roomId;
 	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "burnination")
-	private List<BurninationProgress> progresses = new ArrayList<>();
+	@OneToOne(mappedBy = "burnination", cascade = CascadeType.ALL)
+	private BurninationProgress progress;
 	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "burnination")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "burnination", cascade = CascadeType.ALL)
 	private List<BurninationQuestion> questions = new ArrayList<>();
 
 	public long getId() {
@@ -90,8 +92,13 @@ public class Burnination implements Serializable {
 		this.roomId = roomId;
 	}
 
-	public List<BurninationProgress> getProgresses() {
-		return progresses;
+	public BurninationProgress getProgress() {
+		return progress;
+	}
+
+	public void setProgress(BurninationProgress progress) {
+		this.progress = progress;
+		progress.setBurnination(this);
 	}
 
 	public List<BurninationQuestion> getQuestions() {

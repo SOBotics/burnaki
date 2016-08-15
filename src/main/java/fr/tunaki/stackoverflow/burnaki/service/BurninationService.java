@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +17,7 @@ import fr.tunaki.stackoverflow.burnaki.BurnakiException;
 import fr.tunaki.stackoverflow.burnaki.api.Question;
 import fr.tunaki.stackoverflow.burnaki.api.StackExchangeAPIService;
 import fr.tunaki.stackoverflow.burnaki.entity.Burnination;
+import fr.tunaki.stackoverflow.burnaki.entity.BurninationProgress;
 import fr.tunaki.stackoverflow.burnaki.entity.BurninationQuestion;
 import fr.tunaki.stackoverflow.burnaki.entity.BurninationQuestionHistory;
 import fr.tunaki.stackoverflow.burnaki.repository.BurninationRepository;
@@ -30,13 +30,11 @@ public class BurninationService {
 	
 	private BurninationRepository repository;
 	private StackExchangeAPIService apiService;
-	private int refreshEvery;
 	
 	@Autowired
-	public BurninationService(BurninationRepository repository, StackExchangeAPIService apiService, @Value("${burnination.refreshEvery}") int refreshEvery) {
+	public BurninationService(BurninationRepository repository, StackExchangeAPIService apiService) {
 		this.repository = repository;
 		this.apiService = apiService;
-		this.refreshEvery = refreshEvery;
 	}
 	
 	public void start(String tag, int roomId, String metaLink) {
@@ -59,7 +57,7 @@ public class BurninationService {
 		repository.save(burnination);
 	}
 	
-	public void update(String tag) {
+	public void update(String tag, int refreshEvery) {
 		Burnination burnination = getCurrentBurninationForTag(tag);
 		LOGGER.debug("Updating the burnination of tag [{}]", tag);
 		Map<Integer, BurninationQuestion> presentMap = burnination.getQuestions().stream().collect(Collectors.toMap(bq -> bq.getId().getQuestionId(), Function.identity()));
@@ -75,6 +73,28 @@ public class BurninationService {
 			burnination.addQuestion(burninationQuestion);
 			populateBurninationQuestion(question, burninationQuestion, tag);
 		}
+		repository.save(burnination);
+	}
+	
+	public void updateProgress(String tag) {
+		Burnination burnination = getCurrentBurninationForTag(tag);
+		BurninationProgress burninationProgress = burnination.getProgress();
+		if (burninationProgress == null) {
+			burninationProgress = new BurninationProgress(burnination, Instant.now());
+			burnination.setProgress(burninationProgress);
+		}
+		int closed = 0, manuallyDeleted = 0, retagged = 0, roombad = 0;
+		for (BurninationQuestion question : burnination.getQuestions()) {
+			if (question.isClosed()) closed++;
+			if (question.isManuallyDeleted()) manuallyDeleted++;
+			if (question.isRetagged()) retagged++;
+			if (question.isRoombad()) roombad++;
+		}
+		burninationProgress.setClosed(closed);
+		burninationProgress.setManuallyDeleted(manuallyDeleted);
+		burninationProgress.setRetagged(retagged);
+		burninationProgress.setRoombad(roombad);
+		burninationProgress.setTotalQuestions(burnination.getQuestions().size());
 		repository.save(burnination);
 	}
 

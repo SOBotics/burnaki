@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -61,7 +62,7 @@ public class BurninationQuestion implements Serializable {
 	@Column(name = "retagged", nullable = false)
 	private boolean retagged;
 	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "burninationQuestion")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "burninationQuestion", cascade = CascadeType.ALL)
 	private List<BurninationQuestionHistory> histories = new ArrayList<>();
 	
 	public BurninationQuestion() { }

@@ -1,16 +1,16 @@
 package fr.tunaki.stackoverflow.burnaki.entity;
 
 import java.io.Serializable;
+import java.time.Instant;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.MapsId;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -26,7 +26,7 @@ public class BurninationProgress implements Serializable {
 	private BurninationProgressId id;
 	
 	@MapsId("burninationId")
-	@ManyToOne(fetch = FetchType.LAZY)
+	@OneToOne
 	@JoinColumn(name = "burnination_id", nullable = false)
 	private Burnination burnination;
 	
@@ -44,6 +44,14 @@ public class BurninationProgress implements Serializable {
 	
 	@Column(name = "retagged")
 	private int retagged;
+	
+	public BurninationProgress() { }
+	
+	public BurninationProgress(Burnination burnination, Instant progressDate) {
+		id = new BurninationProgressId();
+		id.setBurninationId(burnination.getId());
+		id.setProgressDate(progressDate);
+	}
 
 	public BurninationProgressId getId() {
 		return id;
@@ -51,6 +59,10 @@ public class BurninationProgress implements Serializable {
 
 	public Burnination getBurnination() {
 		return burnination;
+	}
+
+	public void setBurnination(Burnination burnination) {
+		this.burnination = burnination;
 	}
 
 	public int getTotalQuestions() {
@@ -91,10 +103,6 @@ public class BurninationProgress implements Serializable {
 
 	public void setRetagged(int retagged) {
 		this.retagged = retagged;
-	}
-
-	public void setId(BurninationProgressId id) {
-		this.id = id;
 	}
 
 }

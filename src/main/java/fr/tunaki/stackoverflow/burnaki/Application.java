@@ -1,29 +1,40 @@
 package fr.tunaki.stackoverflow.burnaki;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import fr.tunaki.stackoverflow.burnaki.api.StackExchangeAPIProperties;
+import fr.tunaki.stackoverflow.burnaki.scheduler.BurninationScheduler;
+import fr.tunaki.stackoverflow.burnaki.scheduler.BurninationSchedulerProperties;
 
 @SpringBootApplication
-@EnableConfigurationProperties(StackExchangeAPIProperties.class)
+@EnableConfigurationProperties({StackExchangeAPIProperties.class, BurninationSchedulerProperties.class})
+@EnableScheduling
 public class Application {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
 
 	public static void main(String[] args) {
-		SpringApplication.run(Application.class);
+		ConfigurableApplicationContext context = SpringApplication.run(Application.class);
+		BurninationScheduler scheduler = context.getBean(BurninationScheduler.class);
+		scheduler.start("godaddy", 123, "http");
+		scheduler.stop("godaddy");
+		context.close();
 	}
 	
-//	@Bean
-//	public CommandLineRunner demo(StackExchangeAPIService service) {
-//		return args -> {
-//			service.getQuestionsInTag("java", Instant.now().minus(5, ChronoUnit.MINUTES)).forEach(q -> LOGGER.info(""+q.getId()));
-//		};
-//	}
+	@Bean
+	public ScheduledExecutorService scheduledExecutorService() {
+		return Executors.newSingleThreadScheduledExecutor();
+	}
 	
 //	@Bean
 //	public CommandLineRunner demo(BurninationRepository repository, BurninationService service) {
