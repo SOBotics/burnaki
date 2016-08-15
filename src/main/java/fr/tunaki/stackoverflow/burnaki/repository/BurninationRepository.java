@@ -20,6 +20,6 @@ public interface BurninationRepository extends CrudRepository<Burnination, Long>
 	 * Returns the list of on-going burnination burnination.
 	 * @return The list of on-going burnination burnination.
 	 */
-	Stream<Burnination> findEndDateNull();
+	Stream<Burnination> findByEndDateNull();
 
 }
