@@ -16,12 +16,13 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import fr.tunaki.stackoverflow.burnaki.entity.BurninationProgress;
 import fr.tunaki.stackoverflow.burnaki.service.BurninationService;
 
 @Component
-public class BurninationScheduler implements Closeable, InitializingBean {
+public class BurninationManager implements Closeable, InitializingBean {
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(BurninationScheduler.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(BurninationManager.class);
 	
 	private BurninationService burninationService;
 	private ScheduledExecutorService executorService;
@@ -30,7 +31,7 @@ public class BurninationScheduler implements Closeable, InitializingBean {
 	private Map<String, List<ScheduledFuture<?>>> tasks = new ConcurrentHashMap<>();
 	
 	@Autowired
-	public BurninationScheduler(ScheduledExecutorService executorService, BurninationService burninationService, BurninationSchedulerProperties properties) {
+	public BurninationManager(ScheduledExecutorService executorService, BurninationService burninationService, BurninationSchedulerProperties properties) {
 		this.executorService = executorService;
 		this.burninationService = burninationService;
 		this.properties = properties;
@@ -54,6 +55,18 @@ public class BurninationScheduler implements Closeable, InitializingBean {
 			executorService.scheduleAtFixedRate(() -> burninationService.update(t, refreshQuestionsEvery), refreshQuestionsEvery, refreshQuestionsEvery, TimeUnit.MINUTES),
 			executorService.scheduleAtFixedRate(() -> burninationService.updateProgress(t), refreshProgressEvery, refreshProgressEvery, TimeUnit.MINUTES)
 		));
+	}
+	
+	public void updateProgressNow(String tag) {
+		burninationService.updateProgress(tag);
+	}
+	
+	public BurninationProgress getProgress(String tag) {
+		return burninationService.getProgress(tag);
+	}
+	
+	public Map<Integer, String> getBurnRooms() {
+		return burninationService.getBurnRooms();
 	}
 	
 	public void stop(String tag) {

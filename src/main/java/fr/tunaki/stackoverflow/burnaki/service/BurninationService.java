@@ -98,6 +98,10 @@ public class BurninationService {
 		burninationProgress.setTotalQuestions(burnination.getQuestions().size());
 		repository.save(burnination);
 	}
+	
+	public BurninationProgress getProgress(String tag) {
+		return getCurrentBurninationForTag(tag).getProgress();
+	}
 
 	public void stop(String tag) {
 		Burnination burnination = getCurrentBurninationForTag(tag);
@@ -108,6 +112,10 @@ public class BurninationService {
 	
 	public List<String> getTagsInBurnination() {
 		return repository.findByEndDateNull().map(Burnination::getTag).collect(Collectors.toList());
+	}
+	
+	public Map<Integer, String> getBurnRooms() {
+		return repository.findByEndDateNull().collect(Collectors.toMap(Burnination::getRoomId, Burnination::getTag));
 	}
 
 	private void populateBurninationQuestion(Question question, BurninationQuestion burninationQuestion, String tag) {
