@@ -2,6 +2,7 @@ package fr.tunaki.stackoverflow.burnaki.service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
@@ -103,6 +104,10 @@ public class BurninationService {
 		LOGGER.info("Stopping the burnination of tag [{}]", tag);
 		burnination.setEndDate(Instant.now());
 		repository.save(burnination);
+	}
+	
+	public List<String> getTagsInBurnination() {
+		return repository.findEndDateNull().map(Burnination::getTag).collect(Collectors.toList());
 	}
 
 	private void populateBurninationQuestion(Question question, BurninationQuestion burninationQuestion, String tag) {

@@ -1,6 +1,7 @@
 package fr.tunaki.stackoverflow.burnaki.repository;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.springframework.data.repository.CrudRepository;
 
@@ -14,5 +15,11 @@ public interface BurninationRepository extends CrudRepository<Burnination, Long>
 	 * @return The on-going burnination for the given tag, as an <code>Optional</code>.
 	 */
 	Optional<Burnination> findByTagAndEndDateNull(String tag);
+	
+	/**
+	 * Returns the list of on-going burnination burnination.
+	 * @return The list of on-going burnination burnination.
+	 */
+	Stream<Burnination> findEndDateNull();
 
 }

@@ -10,13 +10,18 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import fr.tunaki.stackoverflow.burnaki.service.BurninationService;
 
 @Component
-public class BurninationScheduler implements Closeable {
+public class BurninationScheduler implements Closeable, InitializingBean {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(BurninationScheduler.class);
 	
 	private BurninationService burninationService;
 	private ScheduledExecutorService executorService;
@@ -31,8 +36,18 @@ public class BurninationScheduler implements Closeable {
 		this.properties = properties;
 	}
 	
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		burninationService.getTagsInBurnination().forEach(this::scheduleTasks);
+	}
+
 	public void start(String tag, int roomId, String metaLink) {
 		burninationService.start(tag, roomId, metaLink);
+		scheduleTasks(tag);
+	}
+
+	private void scheduleTasks(String tag) {
+		LOGGER.info("Scheduling background burnination tasks for tag [{}]", tag);
 		int refreshQuestionsEvery = properties.getRefreshQuestionsEvery();
 		int refreshProgressEvery = properties.getRefreshProgressEvery();
 		tasks.computeIfAbsent(tag, t -> Arrays.asList(
