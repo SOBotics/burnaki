@@ -67,7 +67,7 @@ public class BurnakiBot implements Closeable, InitializingBean {
 					hqRoom.replyTo(messageId, "Burnination of tag \\[" + tag + "\\] correctly started! Have fun!");
 				} catch (Exception e) {
 					LOGGER.error("Cannot start burnination of tag [{}]", tag, e);
-					hqRoom.replyTo(messageId, "Cannot start burnination of tag \\[ " + tag + "\\]: " + e.getMessage());
+					hqRoom.replyTo(messageId, "Cannot start burnination of tag \\[" + tag + "\\]: " + e.getMessage());
 				}
 			} else if (stripped.startsWith("stop tag")) {
 				String[] tokens = stripped.substring("stop tag".length() + 1).split(" ");
