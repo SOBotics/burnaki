@@ -29,5 +29,10 @@ public class BurninationUpdateEvent {
 	public Question getQuestion() {
 		return question;
 	}
+	
+	@Override
+	public String toString() {
+		return event + " on question " + question.getId();
+	}
 
 }

@@ -84,7 +84,7 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 		} else {
 			BurnRoom burnRoom = burnRooms.get(roomId);
 			Room room = burnRoom == null ? hqRoom : burnRoom.room;
-			room.replyTo(messageId, "Unknown command: " + message + ". Use `commands` to have a list of commands.");
+			room.send("Unknown command: " + message + ". Use `commands` to have a list of commands.");
 		}
 	}
 	
@@ -92,10 +92,10 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 		BurnRoom burnRoom = burnRooms.get(roomId);
 		Room room = burnRoom == null ? hqRoom : burnRoom.room;
 		String reply = "Here's a list of commands:\n"
-				+ "    start tag \\[tag\\] \\[roomId\\] \\[link to Meta\\] - Starts the burnination of the given tag.\n"
-				+ "    stop tag \\[tag\\] - Stops the burnination of the given tag. Can be omitted if ran inside the dedicated burn room.\n"
-				+ "    get progress \\[tag\\] - Prints the current progress of the tag's burnination. Can be omitted if ran inside the dedicated burn room.\n"
-				+ "    commands - Prints the list of commands.";
+				+ "\t start tag [tag] [roomId] [link to Meta] - Starts the burnination of the given tag.\n"
+				+ "\t stop tag [tag]                          - Stops the burnination of the given tag. Can be omitted if ran inside the dedicated burn room.\n"
+				+ "\t get progress [tag]                      - Prints the current progress of the tag's burnination. Can be omitted if ran inside the dedicated burn room.\n"
+				+ "\t commands                                - Prints the list of commands.";
 		room.replyTo(messageId, reply);
 	}
 
@@ -199,7 +199,7 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 				case RETAGGED_WITHOUT: message.append(" This question has had the burn tag removed, please review it again: " + link + ".\n"); break;
 				}
 			}
-			burnRoom.room.send(message.toString());
+			(burnRoom == null ? hqRoom : burnRoom.room).send(message.toString());
 		}
 	}
 

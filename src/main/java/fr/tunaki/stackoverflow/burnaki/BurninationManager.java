@@ -61,12 +61,13 @@ public class BurninationManager implements Closeable, InitializingBean {
 	}
 
 	private void scheduleTasks(String tag) {
-		LOGGER.info("Scheduling background burnination tasks for tag [{}]", tag);
 		int refreshQuestionsEvery = properties.getRefreshQuestionsEvery();
 		int refreshProgressEvery = properties.getRefreshProgressEvery();
+		LOGGER.info("Scheduling background burnination tasks for tag [{}], refreshing questions every {} minutes and progress every {} minutes", tag, refreshQuestionsEvery, refreshProgressEvery);
 		tasks.computeIfAbsent(tag, t -> Arrays.asList(
 			executorService.scheduleAtFixedRate(() -> {
 				List<BurninationUpdateEvent> events = burninationService.update(t, refreshQuestionsEvery);
+				LOGGER.debug("Update task finished with {} new events: {}. Listeners: {}", events.size(), events, listeners);
 				listeners.forEach(l -> listenerExecutor.submit(() -> l.onUpdate(events)));
 			}, refreshQuestionsEvery, refreshQuestionsEvery, TimeUnit.MINUTES),
 			executorService.scheduleAtFixedRate(() -> burninationService.updateProgress(t), refreshProgressEvery, refreshProgressEvery, TimeUnit.MINUTES)
