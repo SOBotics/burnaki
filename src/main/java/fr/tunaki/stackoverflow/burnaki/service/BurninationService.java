@@ -107,7 +107,7 @@ public class BurninationService {
 	}
 	
 	public List<String> getTagsInBurnination() {
-		return repository.findEndDateNull().map(Burnination::getTag).collect(Collectors.toList());
+		return repository.findByEndDateNull().map(Burnination::getTag).collect(Collectors.toList());
 	}
 
 	private void populateBurninationQuestion(Question question, BurninationQuestion burninationQuestion, String tag) {
