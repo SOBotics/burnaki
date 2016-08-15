@@ -17,8 +17,8 @@ public interface BurninationRepository extends CrudRepository<Burnination, Long>
 	Optional<Burnination> findByTagAndEndDateNull(String tag);
 	
 	/**
-	 * Returns the list of on-going burnination burnination.
-	 * @return The list of on-going burnination burnination.
+	 * Returns the list of on-going burninations.
+	 * @return The list of on-going burninations.
 	 */
 	Stream<Burnination> findByEndDateNull();
 
