@@ -1,4 +1,4 @@
-package fr.tunaki.stackoverflow.burnaki.db.entities;
+package fr.tunaki.stackoverflow.burnaki.entity;
 
 import java.io.Serializable;
 

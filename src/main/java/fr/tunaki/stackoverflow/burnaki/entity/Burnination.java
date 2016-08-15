@@ -1,11 +1,9 @@
-package fr.tunaki.stackoverflow.burnaki.db.entities;
-
-import static javax.persistence.GenerationType.IDENTITY;
+package fr.tunaki.stackoverflow.burnaki.entity;
 
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -22,7 +20,7 @@ public class Burnination implements Serializable {
 	private static final long serialVersionUID = -9046397626323921632L;
 
 	@Id
-	@GeneratedValue(strategy = IDENTITY)
+	@GeneratedValue
 	@Column(name = "id", unique = true, nullable = false)
 	private long id;
 	
@@ -32,7 +30,7 @@ public class Burnination implements Serializable {
 	@Column(name = "start_date", nullable = false)
 	private Instant startDate;
 	
-	@Column(name = "end_date", nullable = false)
+	@Column(name = "end_date")
 	private Instant endDate;
 	
 	@Column(name = "meta_link", nullable = false)
@@ -42,10 +40,10 @@ public class Burnination implements Serializable {
 	private int roomId;
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "burnination")
-	private Set<BurninationProgress> burninationProgresses = new HashSet<BurninationProgress>();
+	private List<BurninationProgress> progresses = new ArrayList<>();
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "burnination")
-	private Set<BurninationQuestion> burninationQuestions = new HashSet<BurninationQuestion>();
+	private List<BurninationQuestion> questions = new ArrayList<>();
 
 	public long getId() {
 		return id;
@@ -92,20 +90,17 @@ public class Burnination implements Serializable {
 		this.roomId = roomId;
 	}
 
-	public Set<BurninationProgress> getBurninationProgresses() {
-		return burninationProgresses;
+	public List<BurninationProgress> getProgresses() {
+		return progresses;
 	}
 
-	public void setBurninationProgresses(Set<BurninationProgress> burninationProgresses) {
-		this.burninationProgresses = burninationProgresses;
+	public List<BurninationQuestion> getQuestions() {
+		return questions;
 	}
-
-	public Set<BurninationQuestion> getBurninationQuestions() {
-		return burninationQuestions;
-	}
-
-	public void setBurninationQuestions(Set<BurninationQuestion> burninationQuestions) {
-		this.burninationQuestions = burninationQuestions;
+	
+	public void addQuestion(BurninationQuestion burninationQuestion) {
+		questions.add(burninationQuestion);
+		burninationQuestion.setBurnination(this);
 	}
 
 }

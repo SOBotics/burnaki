@@ -5,6 +5,7 @@ import static fr.tunaki.stackoverflow.burnaki.util.Utils.unorderedBatchesWith;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -13,47 +14,45 @@ import org.jsoup.Connection.Method;
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+@Component
 public class StackExchangeAPIService {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(StackExchangeAPIService.class);
-	private static final String ROOT_URL = "https://api.stackexchange.com/2.2";
-	private static final String PAGE_SIZE = "100";
 	
-	private String site;
-	private String apiKey;
-	private String filter;
+	private StackExchangeAPIProperties properties;
 	
 	private int quota;
 	
-	public StackExchangeAPIService(String apiKey, String filter) {
-		this("stackoverflow", apiKey, filter);
+	@Autowired
+	public StackExchangeAPIService(StackExchangeAPIProperties properties) {
+		this.properties = properties;
 	}
 	
-	public StackExchangeAPIService(String site, String apiKey, String filter) {
-		this.site = site;
-		this.apiKey = apiKey;
-		this.filter = filter;
-	}
-
-	public List<Question> getQuestionsWithTag(String tag) {
-		LOGGER.info("Retrieving all questions tagged [{}]", tag);
-		return getQuestionsWithTag(tag, 1);
+	public List<Question> getQuestionsInTag(String tag, Instant from) {
+		LOGGER.debug("Retrieving all questions tagged [{}]", tag);
+		return getQuestionsWithTag(tag, from, 1);
 	}
 	
-	private List<Question> getQuestionsWithTag(String tag, int page) {
+	private List<Question> getQuestionsWithTag(String tag, Instant from, int page) {
 		LOGGER.debug("Retrieving all questions tagged [{}], page {}", tag, page);
 		try {
-			JsonObject root = get("/questions", "tagged", tag, "page", Integer.toString(page));
+			JsonObject root;
+			if (from == null) {
+				root = get("/questions", "tagged", tag, "page", String.valueOf(page));
+			} else {
+				root = get("/questions", "tagged", tag, "fromdate", String.valueOf(from.getEpochSecond()), "page", String.valueOf(page));
+			}
 			List<Question> questions = toQuestions(root);
-			System.out.println(questions.size());
 			if (root.get("has_more").getAsBoolean()) {
 				handleBackoff(root);
-				questions.addAll(getQuestionsWithTag(tag, page + 1));
+				questions.addAll(getQuestionsWithTag(tag, from, page + 1));
 			}
 			return questions;
 		} catch (IOException e) {
@@ -62,16 +61,16 @@ public class StackExchangeAPIService {
 		}
 	}
 
-	public List<Question> getQuestionsWithIds(List<Long> ids) {
-		LOGGER.info("Retrieving all questions with ids '{}'", ids);
+	public List<Question> getQuestionsWithIds(Collection<Integer> ids) {
+		LOGGER.debug("Retrieving all questions with ids '{}'", ids);
 		List<String> idsStr = ids.stream().map(Object::toString).collect(unorderedBatchesWith(100, Collectors.joining(";")));
 		return idsStr.stream().flatMap(s -> getQuestionsWithIds(s, 1).stream()).collect(Collectors.toList());
 	}
 	
 	private List<Question> getQuestionsWithIds(String ids, int page) {
-		LOGGER.info("Retrieving all questions with ids '{}', page {}", ids, page);
+		LOGGER.debug("Retrieving all questions with ids '{}', page {}", ids, page);
 		try {
-			JsonObject root = get("/questions/" + ids, "page", Integer.toString(page));
+			JsonObject root = get("/questions/" + ids, "page", String.valueOf(page));
 			List<Question> questions = toQuestions(root);
 			if (root.get("has_more").getAsBoolean()) {
 				handleBackoff(root);
@@ -91,7 +90,7 @@ public class StackExchangeAPIService {
 	private void handleBackoff(JsonObject root) {
 		if (root.has("backoff")) {
 			int backoff = root.get("backoff").getAsInt();
-			LOGGER.info("Backing off {} seconds", backoff);
+			LOGGER.warn("Backing off {} seconds", backoff);
 			try {
 				Thread.sleep(1000 * backoff);
 			} catch (InterruptedException e) {
@@ -102,15 +101,20 @@ public class StackExchangeAPIService {
 
 	private Question itemToQuestion(JsonObject object) {
 		Question question = new Question();
-		question.setId(object.get("question_id").getAsLong());
+		question.setId(object.get("question_id").getAsInt());
 		question.setLink(object.get("link").getAsString());
 		question.setTitle(object.get("title").getAsString());
-		if (object.has("closed_date")) {
-			question.setClosedDate(Instant.ofEpochSecond(object.get("closed_date").getAsLong()));
-		}
+		question.setTags(StreamSupport.stream(object.get("tags").getAsJsonArray().spliterator(), false).map(JsonElement::getAsString).collect(Collectors.toList()));
 		question.setCloseVoteCount(object.get("close_vote_count").getAsInt());
 		question.setReopenVoteCount(object.get("reopen_vote_count").getAsInt());
 		question.setDeleteVoteCount(object.get("delete_vote_count").getAsInt());
+		// FIXME: question.setUndeleteVoteCount(undeleteVoteCount);
+		question.setCreatedDate(Instant.ofEpochSecond(object.get("creation_date").getAsLong()));
+		// FIXME: question.setDeletedDate(deletedDate);
+		// FIXME: question.setRoombad(roombad);
+		if (object.has("closed_date")) {
+			question.setClosedDate(Instant.ofEpochSecond(object.get("closed_date").getAsLong()));
+		}
 		if (object.has("last_edit_date")) {
 			question.setLastEditDate(Instant.ofEpochSecond(object.get("last_edit_date").getAsLong()));
 		}
@@ -132,7 +136,7 @@ public class StackExchangeAPIService {
 	}
 
 	private JsonObject get(String method, String... data) throws IOException {
-		String json = Jsoup.connect(ROOT_URL + method).data(data).data("site", site, "key", apiKey, "filter", filter, "pageSize", PAGE_SIZE).method(Method.GET).ignoreContentType(true).execute().body();
+		String json = Jsoup.connect(properties.getRootUrl() + method).data(data).data("site", properties.getSite(), "key", properties.getKey(), "filter", properties.getFilter(), "pageSize", properties.getPageSize()).method(Method.GET).ignoreContentType(true).execute().body();
 		JsonObject root = new JsonParser().parse(json).getAsJsonObject();
 		quota = root.get("quota_remaining").getAsInt();
 		return root;

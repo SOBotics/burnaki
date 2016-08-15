@@ -1,25 +1,31 @@
 package fr.tunaki.stackoverflow.burnaki.api;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Question {
 	
-	private long id;
+	private int id;
 	private String link;
 	private String title;
+	private List<String> tags;
 	private int closeVoteCount;
 	private int reopenVoteCount;
 	private int deleteVoteCount;
+	private int undeleteVoteCount;
+	private Instant createdDate;
 	private Instant closedDate;
 	private Instant deletedDate; // not returned by API, calculated when it is noticed that question was deleted
+	private boolean roombad;
 	private Instant lastEditDate;
 	private ShallowUser lastEditor;
 
-	public long getId() {
+	public int getId() {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 
@@ -63,6 +69,22 @@ public class Question {
 		this.deleteVoteCount = deleteVoteCount;
 	}
 
+	public int getUndeleteVoteCount() {
+		return undeleteVoteCount;
+	}
+
+	public void setUndeleteVoteCount(int undeleteVoteCount) {
+		this.undeleteVoteCount = undeleteVoteCount;
+	}
+
+	public Instant getCreatedDate() {
+		return createdDate;
+	}
+
+	public void setCreatedDate(Instant createdDate) {
+		this.createdDate = createdDate;
+	}
+
 	public Instant getClosedDate() {
 		return closedDate;
 	}
@@ -93,6 +115,22 @@ public class Question {
 
 	public void setLastEditor(ShallowUser lastEditor) {
 		this.lastEditor = lastEditor;
+	}
+
+	public boolean isRoombad() {
+		return roombad;
+	}
+
+	public void setRoombad(boolean roombad) {
+		this.roombad = roombad;
+	}
+	
+	public void setTags(List<String> tags) {
+		this.tags = new ArrayList<>(tags);
+	}
+
+	public boolean hasTag(String tag) {
+		return tags.contains(tag);
 	}
 
 }

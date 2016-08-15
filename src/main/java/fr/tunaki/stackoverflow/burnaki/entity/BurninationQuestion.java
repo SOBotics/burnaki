@@ -1,9 +1,9 @@
-package fr.tunaki.stackoverflow.burnaki.db.entities;
+package fr.tunaki.stackoverflow.burnaki.entity;
 
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
@@ -62,7 +62,15 @@ public class BurninationQuestion implements Serializable {
 	private boolean retagged;
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "burninationQuestion")
-	private Set<BurninationQuestionHistory> burninationQuestionHistories = new HashSet<BurninationQuestionHistory>(0);
+	private List<BurninationQuestionHistory> histories = new ArrayList<>();
+	
+	public BurninationQuestion() { }
+	
+	public BurninationQuestion(Burnination burnination, int questionId) {
+		id = new BurninationQuestionId();
+		id.setBurninationId(burnination.getId());
+		id.setQuestionId(questionId);
+	}
 
 	public BurninationQuestionId getId() {
 		return id;
@@ -70,6 +78,10 @@ public class BurninationQuestion implements Serializable {
 
 	public Burnination getBurnination() {
 		return burnination;
+	}
+
+	public void setBurnination(Burnination burnination) {
+		this.burnination = burnination;
 	}
 
 	public Instant getCreatedDate() {
@@ -144,12 +156,13 @@ public class BurninationQuestion implements Serializable {
 		this.retagged = retagged;
 	}
 
-	public Set<BurninationQuestionHistory> getBurninationQuestionHistories() {
-		return burninationQuestionHistories;
+	public List<BurninationQuestionHistory> getHistories() {
+		return histories;
 	}
 
-	public void setBurninationQuestionHistories(Set<BurninationQuestionHistory> burninationQuestionHistories) {
-		this.burninationQuestionHistories = burninationQuestionHistories;
+	public void addHistory(BurninationQuestionHistory burninationQuestionHistory) {
+		histories.add(burninationQuestionHistory);
+		burninationQuestionHistory.setBurninationQuestion(this);
 	}
 
 }

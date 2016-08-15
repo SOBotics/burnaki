@@ -1,7 +1,8 @@
-package fr.tunaki.stackoverflow.burnaki.db.entities;
+package fr.tunaki.stackoverflow.burnaki.entity;
 // Generated 15 ao�t 2016 00:59:03 by Hibernate Tools 4.3.4.Final
 
 import java.io.Serializable;
+import java.time.Instant;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
@@ -40,13 +41,18 @@ public class BurninationQuestionHistory implements Serializable {
 	
 	@Column(name = "event_type", nullable = false, length = 45)
 	private String eventType;
+	
+	public BurninationQuestionHistory() { }
+
+	public BurninationQuestionHistory(BurninationQuestion burninationQuestion, String eventType, Instant eventDate) {
+		id = new BurninationQuestionHistoryId();
+		id.setBurninationQuestionId(burninationQuestion.getId());
+		id.setEventDate(eventDate);
+		this.eventType = eventType;
+	}
 
 	public BurninationQuestionHistoryId getId() {
 		return id;
-	}
-
-	public void setId(BurninationQuestionHistoryId id) {
-		this.id = id;
 	}
 
 	public BurninationQuestion getBurninationQuestion() {
