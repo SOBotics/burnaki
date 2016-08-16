@@ -188,17 +188,7 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 		if (!events.isEmpty()) {
 			StringBuilder message = new StringBuilder("Hear, hear, new notifications for the burn team!\n");
 			BurnRoom burnRoom = burnRooms.get(tagsMap.get(events.get(0).getTag()));
-			for (BurninationUpdateEvent event : events) {
-				String link = event.getQuestion().getLink();
-				switch (event.getEvent()) {
-				case CLOSED: message.append(" This question has been closed by the burn team: " + link + ".\n"); break;
-				case UNDELETE_VOTE: message.append(" This question has received an undelete vote, please review it again: " + link + ".\n"); break;
-				case DELETED: message.append(" This question has been deleted, please review it again: " + link + ".\n"); break;
-				case NEW: message.append(" This question has just been posted in the burn tag: " + link + ".\n"); break;
-				case REOPEN_VOTE: message.append(" This question has received a reopen vote, please review it again: " + link + ".\n"); break;
-				case RETAGGED_WITHOUT: message.append(" This question has had the burn tag removed, please review it again: " + link + ".\n"); break;
-				}
-			}
+			message.append(events.stream().collect(Collectors.groupingBy(BurninationUpdateEvent::getEvent, Collectors.mapping(e -> e.getQuestion().getLink(), Collectors.joining(", ", ": ", ".")))).entrySet().stream().map(e -> e.getKey().name() + e.getValue()).collect(Collectors.joining("\n", " - ", "")));
 			(burnRoom == null ? hqRoom : burnRoom.room).send(message.toString());
 		}
 	}
