@@ -91,12 +91,13 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 	private void commandsCommand(long messageId, int roomId) {
 		BurnRoom burnRoom = burnRooms.get(roomId);
 		Room room = burnRoom == null ? hqRoom : burnRoom.room;
-		String reply = "Here's a list of commands:\n"
-				+ "\t start tag [tag] [roomId] [link to Meta] - Starts the burnination of the given tag.\n"
-				+ "\t stop tag [tag]                          - Stops the burnination of the given tag. Can be omitted if ran inside the dedicated burn room.\n"
-				+ "\t get progress [tag]                      - Prints the current progress of the tag's burnination. Can be omitted if ran inside the dedicated burn room.\n"
-				+ "\t commands                                - Prints the list of commands.";
-		room.replyTo(messageId, reply);
+		room.replyTo(messageId, "Here's a list of commands:");
+		String commands = ""
+				+ "    start tag [tag] [roomId] [link to Meta] - Starts the burnination of the given tag.\n"
+				+ "    stop tag [tag]                          - Stops the burnination of the given tag. Can be omitted if ran inside the dedicated burn room.\n"
+				+ "    get progress [tag]                      - Prints the current progress of the tag's burnination. Can be omitted if ran inside the dedicated burn room.\n"
+				+ "    commands                                - Prints the list of commands.";
+		room.send(commands);
 	}
 
 
