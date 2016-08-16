@@ -81,6 +81,8 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 			stopTagCommand(messageId, roomId, message.substring("stop tag".length()).trim().split(" "));
 		} else if (message.startsWith("get progress")) {
 			getProgressCommand(messageId, roomId , message.substring("get progress".length()).trim().split(" "));
+		} else if (message.startsWith("update progress")) {
+			updateProgressCommand(messageId, roomId , message.substring("update progress".length()).trim().split(" "));
 		} else {
 			BurnRoom burnRoom = burnRooms.get(roomId);
 			Room room = burnRoom == null ? hqRoom : burnRoom.room;
@@ -93,10 +95,11 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 		Room room = burnRoom == null ? hqRoom : burnRoom.room;
 		room.replyTo(messageId, "Here's a list of commands:");
 		String commands = ""
+				+ "    commands                                - Prints the list of commands.\n"
 				+ "    start tag [tag] [roomId] [link to Meta] - Starts the burnination of the given tag.\n"
 				+ "    stop tag [tag]                          - Stops the burnination of the given tag. Can be omitted if ran inside the dedicated burn room.\n"
 				+ "    get progress [tag]                      - Prints the current progress of the tag's burnination. Can be omitted if ran inside the dedicated burn room.\n"
-				+ "    commands                                - Prints the list of commands.";
+				+ "    update progress [tag]                   - Force an update of the current progress of the tag's burnination.";
 		room.send(commands);
 	}
 
@@ -165,6 +168,25 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 			} catch (Exception e) {
 				LOGGER.error("Cannot get progress of burnination for tag [{}]", tag, e);
 				hqRoom.replyTo(messageId, "Cannot get progress of burnination for tag \\[" + tag + "\\]: " + e.getMessage());
+			}
+		}
+	}
+	
+	private void updateProgressCommand(long messageId, int roomId, String[] tokens) {
+		BurnRoom burnRoom = burnRooms.get(roomId);
+		Room room = burnRoom == null ? hqRoom : burnRoom.room;
+		if (burnRoom == null && tokens.length == 0) {
+			room.replyTo(messageId, "Cannot update progress of burnination; 1 parameters required: \\[tag\\]");
+			return;
+		}
+		String tag = (burnRoom == null || tokens.length == 0) ? cleanTag(tokens[0]) : burnRoom.tag;
+		if (validateTag(messageId, tag)) {
+			try {
+				burninationManager.updateProgressNow(tag);
+				hqRoom.send("Progress has been updated! Run `get progress` to get the current progress.");
+			} catch (Exception e) {
+				LOGGER.error("Cannot update progress of burnination for tag [{}]", tag, e);
+				hqRoom.replyTo(messageId, "Cannot update progress of burnination for tag \\[" + tag + "\\]: " + e.getMessage());
 			}
 		}
 	}
