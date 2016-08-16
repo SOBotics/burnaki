@@ -65,11 +65,11 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 
 	private void registerEventListeners(Room room) {
 		room.addEventListener(EventType.USER_MENTIONED, event -> {
-			String stripped = event.getMessage().getPlainContent().toLowerCase().replaceAll("@tun[^\\s$]*", "").trim();
+			String stripped = event.getMessage().getPlainContent().toLowerCase().replaceAll("\\s*@tun[^\\s$]*\\s*", "").trim();
 			handleMessage(event.getMessage().getId(), event.getRoomId(), stripped);
 		});
 		room.addEventListener(EventType.MESSAGE_REPLY, event -> {
-			String stripped = event.getMessage().getPlainContent().toLowerCase().replaceAll("^:[^\\s$]*", "").trim();
+			String stripped = event.getMessage().getPlainContent().toLowerCase().replaceAll("^:[^\\s$]*\\s*", "").trim();
 			handleMessage(event.getMessage().getId(), event.getRoomId(), stripped);
 		});
 	}
