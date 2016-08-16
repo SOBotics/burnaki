@@ -90,7 +90,7 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 		} else {
 			BurnRoom burnRoom = burnRooms.get(roomId);
 			Room room = burnRoom == null ? hqRoom : burnRoom.room;
-			room.send("Unknown command: " + message + ". Use `commands` to have a list of commands.");
+			room.send("Unknown command: " + sanitizeChatMessage(message) + ". Use `commands` to have a list of commands.");
 		}
 	}
 	
@@ -199,6 +199,10 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 		if (tag.startsWith("[tag:")) tag = tag.substring(5, tag.lastIndexOf(']'));
 		else if (tag.startsWith("[")) tag = tag.substring(1, tag.lastIndexOf(']'));
 		return tag;
+	}
+	
+	private static String sanitizeChatMessage(String message) {
+		return message.replaceAll("(\\[|\\]|_|\\*|`)", "\\\\$1");
 	}
 
 	private boolean validateTag(long messageId, String tag) {
