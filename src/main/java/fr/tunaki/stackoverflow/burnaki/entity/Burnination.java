@@ -12,7 +12,6 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -41,8 +40,8 @@ public class Burnination implements Serializable {
 	@Column(name = "room_id", nullable = false)
 	private int roomId;
 	
-	@OneToOne(mappedBy = "burnination", cascade = CascadeType.ALL)
-	private BurninationProgress progress;
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "burnination", cascade = CascadeType.ALL)
+	private List<BurninationProgress> progresses = new ArrayList<>();
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "burnination", cascade = CascadeType.ALL)
 	private List<BurninationQuestion> questions = new ArrayList<>();
@@ -92,12 +91,12 @@ public class Burnination implements Serializable {
 		this.roomId = roomId;
 	}
 
-	public BurninationProgress getProgress() {
-		return progress;
+	public List<BurninationProgress> getProgresses() {
+		return progresses;
 	}
 
-	public void setProgress(BurninationProgress progress) {
-		this.progress = progress;
+	public void addProgress(BurninationProgress progress) {
+		progresses.add(progress);
 		progress.setBurnination(this);
 	}
 

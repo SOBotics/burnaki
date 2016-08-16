@@ -1,5 +1,8 @@
 package fr.tunaki.stackoverflow.burnaki.service;
 
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.reverseOrder;
+
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -88,11 +91,8 @@ public class BurninationService {
 	
 	public void updateProgress(String tag) {
 		Burnination burnination = getCurrentBurninationForTag(tag);
-		BurninationProgress burninationProgress = burnination.getProgress();
-		if (burninationProgress == null) {
-			burninationProgress = new BurninationProgress(burnination, Instant.now());
-			burnination.setProgress(burninationProgress);
-		}
+		BurninationProgress burninationProgress = new BurninationProgress(burnination, Instant.now());
+		burnination.addProgress(burninationProgress);
 		int closed = 0, manuallyDeleted = 0, retagged = 0, roombad = 0;
 		for (BurninationQuestion question : burnination.getQuestions()) {
 			if (question.isClosed()) closed++;
@@ -109,7 +109,7 @@ public class BurninationService {
 	}
 	
 	public BurninationProgress getProgress(String tag) {
-		return getCurrentBurninationForTag(tag).getProgress();
+		return getCurrentBurninationForTag(tag).getProgresses().stream().sorted(comparing(e -> e.getId().getProgressDate(), reverseOrder())).findFirst().orElse(null);
 	}
 
 	public void stop(String tag) {

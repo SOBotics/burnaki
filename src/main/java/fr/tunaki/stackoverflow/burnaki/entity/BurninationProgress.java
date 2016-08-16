@@ -8,9 +8,10 @@ import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.MapsId;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -26,7 +27,7 @@ public class BurninationProgress implements Serializable {
 	private BurninationProgressId id;
 	
 	@MapsId("burninationId")
-	@OneToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "burnination_id", nullable = false)
 	private Burnination burnination;
 	

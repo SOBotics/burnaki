@@ -1,10 +1,14 @@
 package fr.tunaki.stackoverflow.burnaki.bot;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toMap;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -211,7 +215,7 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 		if (!events.isEmpty()) {
 			StringBuilder message = new StringBuilder("Hear, hear, new notifications for the burn team!\n");
 			BurnRoom burnRoom = burnRooms.get(tagsMap.get(events.get(0).getTag()));
-			message.append(events.stream().collect(Collectors.groupingBy(BurninationUpdateEvent::getEvent, Collectors.mapping(e -> e.getQuestion().getLink(), Collectors.joining(", ", ": ", ".")))).entrySet().stream().map(e -> e.getKey().name() + e.getValue()).collect(Collectors.joining("\n", " - ", "")));
+			message.append(events.stream().collect(groupingBy(BurninationUpdateEvent::getEvent, mapping(e -> e.getQuestion().getLink(), joining(", ", ": ", ".")))).entrySet().stream().map(e -> e.getKey().name() + e.getValue()).collect(joining("\n", " - ", "")));
 			(burnRoom == null ? hqRoom : burnRoom.room).send(message.toString());
 		}
 	}
@@ -220,8 +224,8 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 	public void afterPropertiesSet() throws Exception {
 		hqRoom = client.joinRoom(HOST, HQ_ROOM_ID);
 		Map<Integer, String> idToTag = burninationManager.getBurnRooms();
-		burnRooms = idToTag.entrySet().stream().filter(e -> e.getKey() != HQ_ROOM_ID).collect(Collectors.toMap(Map.Entry::getKey, e -> new BurnRoom(client.joinRoom(HOST, e.getKey()), e.getValue())));
-		tagsMap = idToTag.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+		burnRooms = idToTag.entrySet().stream().filter(e -> e.getKey() != HQ_ROOM_ID).collect(toMap(Map.Entry::getKey, e -> new BurnRoom(client.joinRoom(HOST, e.getKey()), e.getValue())));
+		tagsMap = idToTag.entrySet().stream().collect(toMap(Map.Entry::getValue, Map.Entry::getKey));
 		registerEventListeners(hqRoom);
 		burnRooms.forEach((k, v) -> registerEventListeners(v.room));
 		burninationManager.addListener(this);
