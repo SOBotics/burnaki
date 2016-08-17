@@ -87,6 +87,8 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 			getProgressCommand(messageId, roomId , message.substring("get progress".length()).trim().split(" "));
 		} else if (message.startsWith("update progress")) {
 			updateProgressCommand(messageId, roomId , message.substring("update progress".length()).trim().split(" "));
+		} else if (message.startsWith("quota")) {
+			quotaCommand(messageId, roomId);
 		} else {
 			BurnRoom burnRoom = burnRooms.get(roomId);
 			Room room = burnRoom == null ? hqRoom : burnRoom.room;
@@ -103,10 +105,16 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 				+ "    start tag [tag] [roomId] [link to Meta] - Starts the burnination of the given tag.\n"
 				+ "    stop tag [tag]                          - Stops the burnination of the given tag. Can be omitted if ran inside the dedicated burn room.\n"
 				+ "    get progress [tag]                      - Prints the current progress of the tag's burnination. Can be omitted if ran inside the dedicated burn room.\n"
-				+ "    update progress [tag]                   - Force an update of the current progress of the tag's burnination.";
+				+ "    update progress [tag]                   - Force an update of the current progress of the tag's burnination.\n"
+				+ "    quota                                   - Prints the remaining quota for the Stack Exchange API.";
 		room.send(commands);
 	}
-
+	
+	private void quotaCommand(long messageId, int roomId) {
+		BurnRoom burnRoom = burnRooms.get(roomId);
+		Room room = burnRoom == null ? hqRoom : burnRoom.room;
+		room.replyTo(messageId, "Remaining quota is: " + apiService.getQuotaRemaining());
+	}
 
 	private void startTagCommand(long messageId, String[] tokens) {
 		if (tokens.length != 3) {
