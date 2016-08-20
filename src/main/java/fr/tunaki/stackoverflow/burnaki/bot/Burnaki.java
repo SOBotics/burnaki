@@ -3,6 +3,7 @@ package fr.tunaki.stackoverflow.burnaki.bot;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 import java.io.Closeable;
@@ -225,10 +226,11 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 	@Override
 	public void onUpdate(List<BurninationUpdateEvent> events) {
 		if (!events.isEmpty()) {
-			StringBuilder message = new StringBuilder("Hear, hear, new notifications for the burn team!\n");
 			BurnRoom burnRoom = burnRooms.get(tagsMap.get(events.get(0).getTag()));
-			message.append(events.stream().collect(groupingBy(BurninationUpdateEvent::getEvent, mapping(e -> e.getQuestion().getLink(), joining(", ", ": ", ".")))).entrySet().stream().map(e -> " - " + e.getKey().name() + e.getValue()).collect(joining("\n")));
-			(burnRoom == null ? hqRoom : burnRoom.room).send(message.toString());
+			Room room = burnRoom == null ? hqRoom : burnRoom.room;
+			List<String> messages = events.stream().collect(groupingBy(BurninationUpdateEvent::getEvent, mapping(e -> "[" + sanitizeChatMessage(e.getQuestion().getTitle()) + "](" + e.getQuestion().getShareLink() + ")", joining(", ", ": ", ".")))).entrySet().stream().map(e -> " - " + e.getKey().name() + e.getValue()).collect(toList());
+			room.send("New notifications for the burn team!");
+			messages.forEach(room::send);
 		}
 	}
 

@@ -69,6 +69,7 @@ public class StackExchangeAPIService {
 		LOGGER.debug("Retrieving all questions with ids '{}'", ids);
 		List<String> idsStr = ids.stream().map(Object::toString).collect(unorderedBatchesWith(100, Collectors.joining(";")));
 		return idsStr.stream().flatMap(s -> getQuestionsWithIds(s, 1).stream()).collect(Collectors.toList());
+		// post process returned list and compared with given list of ids to identity deleted questions
 	}
 	
 	public boolean isValidTag(String tag) {
@@ -117,6 +118,7 @@ public class StackExchangeAPIService {
 		Question question = new Question();
 		question.setId(object.get("question_id").getAsInt());
 		question.setLink(object.get("link").getAsString());
+		question.setShareLink(object.get("share_link").getAsString());
 		question.setTitle(object.get("title").getAsString());
 		question.setTags(StreamSupport.stream(object.get("tags").getAsJsonArray().spliterator(), false).map(JsonElement::getAsString).collect(Collectors.toList()));
 		question.setCloseVoteCount(object.get("close_vote_count").getAsInt());
@@ -124,7 +126,7 @@ public class StackExchangeAPIService {
 		question.setDeleteVoteCount(object.get("delete_vote_count").getAsInt());
 		// FIXME: question.setUndeleteVoteCount(undeleteVoteCount);
 		question.setCreatedDate(Instant.ofEpochSecond(object.get("creation_date").getAsLong()));
-		// FIXME: question.setDeletedDate(deletedDate);
+		// FIXME: question.setDeletedDate(deletedDate); there is "accepted_answer_id", "answer_count" and "is_answered".
 		// FIXME: question.setRoombad(roombad);
 		if (object.has("closed_date")) {
 			question.setClosedDate(Instant.ofEpochSecond(object.get("closed_date").getAsLong()));

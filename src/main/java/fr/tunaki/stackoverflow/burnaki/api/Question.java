@@ -8,6 +8,7 @@ public class Question {
 	
 	private int id;
 	private String link;
+	private String shareLink;
 	private String title;
 	private List<String> tags;
 	private int closeVoteCount;
@@ -35,6 +36,14 @@ public class Question {
 
 	public void setLink(String link) {
 		this.link = link;
+	}
+
+	public String getShareLink() {
+		return shareLink;
+	}
+
+	public void setShareLink(String shareLink) {
+		this.shareLink = shareLink;
 	}
 
 	public String getTitle() {
