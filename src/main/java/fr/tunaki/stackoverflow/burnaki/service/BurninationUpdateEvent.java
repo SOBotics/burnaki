@@ -5,7 +5,18 @@ import fr.tunaki.stackoverflow.burnaki.api.Question;
 public class BurninationUpdateEvent {
 	
 	public static enum Event {
-		CLOSED, REOPEN_VOTE, RETAGGED_WITHOUT, DELETED, UNDELETE_VOTE, NEW;
+		CLOSED("Closed"), REOPEN_VOTE("Reopen vote"), RETAGGED_WITHOUT("Tag removed"), DELETED("Deleted"), UNDELETE_VOTE("Undelete vote"), NEW("New");
+		
+		private final String display;
+		
+		private Event(String display) {
+			this.display = display;
+		}
+		
+		public String getDisplay() {
+			return display;
+		}
+		
 	}
 	
 	private Event event;
