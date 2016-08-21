@@ -23,8 +23,10 @@ import fr.tunaki.stackoverflow.burnaki.api.StackExchangeAPIService;
 import fr.tunaki.stackoverflow.burnaki.entity.BurninationProgress;
 import fr.tunaki.stackoverflow.burnaki.service.BurninationUpdateEvent;
 import fr.tunaki.stackoverflow.burnaki.service.BurninationUpdateListener;
+import fr.tunaki.stackoverflow.chat.Message;
 import fr.tunaki.stackoverflow.chat.Room;
 import fr.tunaki.stackoverflow.chat.StackExchangeClient;
+import fr.tunaki.stackoverflow.chat.User;
 import fr.tunaki.stackoverflow.chat.event.EventType;
 
 @Component
@@ -67,33 +69,50 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 	private void registerEventListeners(Room room) {
 		room.addEventListener(EventType.USER_MENTIONED, event -> {
 			String stripped = event.getMessage().getPlainContent().toLowerCase().replaceAll("\\s*@bur[^\\s$]*\\s*", "").trim();
-			handleMessage(event.getMessage().getId(), event.getRoomId(), stripped);
+			handleMessage(event.getMessage(), event.getRoomId(), stripped);
 		});
 		room.addEventListener(EventType.MESSAGE_REPLY, event -> {
 			String stripped = event.getMessage().getPlainContent().toLowerCase().replaceAll("^:[^\\s$]*\\s*", "").trim();
-			handleMessage(event.getMessage().getId(), event.getRoomId(), stripped);
+			handleMessage(event.getMessage(), event.getRoomId(), stripped);
 		});
 	}
 
-	private void handleMessage(long messageId, int roomId, String message) {
-		if (message.startsWith("stop bot")) {
-			context.close();
-		} else if (message.startsWith("commands")) {
+	private void handleMessage(Message message, int roomId, String plainContent) {
+		long messageId = message.getId();
+		if (plainContent.equals("stop")) {
+			stopCommand(message, roomId);
+		} else if (plainContent.startsWith("commands")) {
 			commandsCommand(messageId, roomId);
-		} else if (message.startsWith("start tag")) {
-			startTagCommand(messageId, message.substring("start tag".length()).trim().split(" "));
-		} else if (message.startsWith("stop tag")) {
-			stopTagCommand(messageId, roomId, message.substring("stop tag".length()).trim().split(" "));
-		} else if (message.startsWith("get progress")) {
-			getProgressCommand(messageId, roomId , message.substring("get progress".length()).trim().split(" "));
-		} else if (message.startsWith("update progress")) {
-			updateProgressCommand(messageId, roomId , message.substring("update progress".length()).trim().split(" "));
-		} else if (message.startsWith("quota")) {
+		} else if (plainContent.startsWith("start tag")) {
+			startTagCommand(messageId, plainContent.substring("start tag".length()).trim().split(" "));
+		} else if (plainContent.startsWith("stop tag")) {
+			stopTagCommand(messageId, roomId, plainContent.substring("stop tag".length()).trim().split(" "));
+		} else if (plainContent.startsWith("get progress")) {
+			getProgressCommand(messageId, roomId , plainContent.substring("get progress".length()).trim().split(" "));
+		} else if (plainContent.startsWith("update progress")) {
+			updateProgressCommand(messageId, roomId , plainContent.substring("update progress".length()).trim().split(" "));
+		} else if (plainContent.startsWith("quota")) {
 			quotaCommand(messageId, roomId);
 		} else {
 			BurnRoom burnRoom = burnRooms.get(roomId);
 			Room room = burnRoom == null ? hqRoom : burnRoom.room;
-			room.send("Unknown command: " + sanitizeChatMessage(message) + ". Use `commands` to have a list of commands.");
+			room.send("Unknown command: " + sanitizeChatMessage(plainContent) + ". Use `commands` to have a list of commands.");
+		}
+	}
+
+	private void stopCommand(Message message, int roomId) {
+		BurnRoom burnRoom = burnRooms.get(roomId);
+		Room room = burnRoom == null ? hqRoom : burnRoom.room;
+		User user = message.getUser();
+		if (!user.isModerator() && !user.isRoomOwner() && user.getId() != 1743880) {
+			room.send("Nope. Only a moderator, a room owner or Tunaki can stop me.");
+			return;
+		}
+		if (roomId == HQ_ROOM_ID) {
+			burnRooms.forEach((id, r) -> r.room.send("I'm stopping, see you guys later!"));
+			hqRoom.send("Bye.").thenRun(context::close);
+		} else {
+			room.send("Okay, I'm leaving this room.").thenRun(room::leave).thenRun(() -> burnRooms.remove(roomId));
 		}
 	}
 	
@@ -176,11 +195,11 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 		if (validateTag(messageId, tag)) {
 			try {
 				BurninationProgress progress = burninationManager.getProgress(tag);
-				String message = "Here's a recap of your efforts so far for \\[" + tag + "\\]: Total questions (" + progress.getTotalQuestions() + "), Retagged (" + progress.getRetagged() + "), Closed (" + progress.getClosed() + "), Roombad (" + progress.getRoombad() + "), Manually deleted (" + progress.getManuallyDeleted() + ").";
-				hqRoom.replyTo(messageId, message);
+				String message = "Here's a recap of the efforts so far for \\[" + tag + "\\]: Total questions (" + progress.getTotalQuestions() + "), Retagged (" + progress.getRetagged() + "), Closed (" + progress.getClosed() + "), Roombad (" + progress.getRoombad() + "), Manually deleted (" + progress.getManuallyDeleted() + ").";
+				room.send(message);
 			} catch (Exception e) {
 				LOGGER.error("Cannot get progress of burnination for tag [{}]", tag, e);
-				hqRoom.replyTo(messageId, "Cannot get progress of burnination for tag \\[" + tag + "\\]: " + e.getMessage());
+				room.replyTo(messageId, "Cannot get progress of burnination for tag \\[" + tag + "\\]: " + e.getMessage());
 			}
 		}
 	}
@@ -196,10 +215,10 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 		if (validateTag(messageId, tag)) {
 			try {
 				burninationManager.updateProgressNow(tag);
-				hqRoom.send("Progress has been updated! Run `get progress` to get the current progress.");
+				room.send("Progress has been updated! Run `get progress` to get the current progress.");
 			} catch (Exception e) {
 				LOGGER.error("Cannot update progress of burnination for tag [{}]", tag, e);
-				hqRoom.replyTo(messageId, "Cannot update progress of burnination for tag \\[" + tag + "\\]: " + e.getMessage());
+				room.replyTo(messageId, "Cannot update progress of burnination for tag \\[" + tag + "\\]: " + e.getMessage());
 			}
 		}
 	}
