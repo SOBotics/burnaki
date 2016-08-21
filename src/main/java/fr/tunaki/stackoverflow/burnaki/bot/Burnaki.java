@@ -248,7 +248,6 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 			BurnRoom burnRoom = burnRooms.get(tagsMap.get(events.get(0).getTag()));
 			Room room = burnRoom == null ? hqRoom : burnRoom.room;
 			List<String> messages = events.stream().collect(groupingBy(BurninationUpdateEvent::getEvent, mapping(e -> "[" + sanitizeChatMessage(e.getQuestion().getTitle()) + "](" + e.getQuestion().getShareLink() + ")", joining(", ", ": ", ".")))).entrySet().stream().map(e -> " - " + e.getKey().getDisplay() + e.getValue()).collect(toList());
-			room.send("New notifications for the burn team!");
 			messages.forEach(room::send);
 		}
 	}
