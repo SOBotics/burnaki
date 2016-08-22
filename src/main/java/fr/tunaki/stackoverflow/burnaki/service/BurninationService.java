@@ -145,14 +145,14 @@ public class BurninationService {
 		}
 		
 		burninationQuestion.setCloseVoteCount(question.getCloseVoteCount());
-		if (question.getReopenVoteCount() == 1 && burninationQuestion.getReopenVoteCount() == 0) {
+		if (question.getReopenVoteCount() > 0 && burninationQuestion.getReopenVoteCount() == 0) {
 			events.add(new BurninationUpdateEvent(BurninationUpdateEvent.Event.REOPEN_VOTE, tag, question));
 		}
 		
 		burninationQuestion.setReopenVoteCount(question.getReopenVoteCount());
 		burninationQuestion.setDeleteVoteCount(question.getDeleteVoteCount());
 		
-		if (question.getUndeleteVoteCount() == 1 && burninationQuestion.getUndeleteVoteCount() == 0) {
+		if (question.getUndeleteVoteCount() > 0 && burninationQuestion.getUndeleteVoteCount() == 0) {
 			events.add(new BurninationUpdateEvent(BurninationUpdateEvent.Event.UNDELETE_VOTE, tag, question));
 		}
 		burninationQuestion.setUndeleteVoteCount(question.getUndeleteVoteCount());
