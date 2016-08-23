@@ -125,7 +125,7 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 				+ "    start tag [tag] [roomId] [link to Meta] - Starts the burnination of the given tag.\n"
 				+ "    stop tag [tag]                          - Stops the burnination of the given tag. Can be omitted if ran inside the dedicated burn room.\n"
 				+ "    get progress [tag]                      - Prints the current progress of the tag's burnination. Can be omitted if ran inside the dedicated burn room.\n"
-				+ "    update progress [tag]                   - Force an update of the current progress of the tag's burnination.\n"
+				+ "    update progress [tag]                   - Force an update of the current progress of the tag's burnination. Can be omitted if ran inside the dedicated burn room.\n"
 				+ "    quota                                   - Prints the remaining quota for the Stack Exchange API.";
 		room.send(commands);
 	}
