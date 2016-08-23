@@ -259,7 +259,11 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 		burnRooms = idToTag.entrySet().stream().filter(e -> e.getKey() != HQ_ROOM_ID).collect(toMap(Map.Entry::getKey, e -> new BurnRoom(client.joinRoom(HOST, e.getKey()), e.getValue())));
 		tagsMap = idToTag.entrySet().stream().collect(toMap(Map.Entry::getValue, Map.Entry::getKey));
 		registerEventListeners(hqRoom);
-		burnRooms.forEach((k, v) -> registerEventListeners(v.room));
+		hqRoom.send("Hiya o/");
+		burnRooms.forEach((k, v) -> {
+			registerEventListeners(v.room);
+			v.room.send("Hiya.");
+		});
 		burninationManager.addListener(this);
 	}
 
