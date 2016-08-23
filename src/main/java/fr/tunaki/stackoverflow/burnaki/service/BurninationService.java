@@ -173,14 +173,14 @@ public class BurninationService {
 		if (question.getDeletedDate() != null) {
 			if (question.isRoombad()) {
 				if (!burninationQuestion.isRoombad()) {
-					burninationQuestion.addHistory(new BurninationQuestionHistory(burninationQuestion, "ROOMBAD", Instant.now()));
+					burninationQuestion.addHistory(new BurninationQuestionHistory(burninationQuestion, "ROOMBAD", question.getDeletedDate()));
 					events.add(new BurninationUpdateEvent(BurninationUpdateEvent.Event.DELETED, tag, question));
 				}
 				burninationQuestion.setRoombad(true);
 				burninationQuestion.setManuallyDeleted(false);
 			} else {
 				if (!burninationQuestion.isManuallyDeleted()) {
-					burninationQuestion.addHistory(new BurninationQuestionHistory(burninationQuestion, "MANUALLY DELETED", Instant.now()));
+					burninationQuestion.addHistory(new BurninationQuestionHistory(burninationQuestion, "MANUALLY DELETED", question.getDeletedDate()));
 					events.add(new BurninationUpdateEvent(BurninationUpdateEvent.Event.DELETED, tag, question));
 				}
 				burninationQuestion.setRoombad(false);
