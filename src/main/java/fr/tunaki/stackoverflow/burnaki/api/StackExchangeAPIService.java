@@ -221,7 +221,7 @@ public class StackExchangeAPIService {
 		questionCache.setScore(object.get("score").getAsInt());
 		questionCache.setShareLink(object.get("share_link").getAsString());
 		questionCache.setTags(StreamSupport.stream(object.get("tags").getAsJsonArray().spliterator(), false).map(JsonElement::getAsString).collect(Collectors.joining(",")));
-		questionCache.setTitle(object.get("title").getAsString());
+		questionCache.setTitle(Parser.unescapeEntities(object.get("title").getAsString(), false));
 		questionCache.setViewCount(object.get("view_count").getAsInt());
 		questionCache.setWithAcceptedAnswer(object.has("accepted_answer_id"));
 		return questionCache;
