@@ -102,18 +102,18 @@ public class StackExchangeAPIService {
 	private boolean wasProbablyRoombad(SEApiQuestionCache cached) {
 		long age = DAYS.between(cached.getCreatedDate(), Instant.now());
 		return /* RemoveDeadQuestions */
-				(age > 30 && cached.getScore() <= -1 && cached.getAnswerCount() == 0 && !cached.isLocked()) ||
+				(age >= 30 && cached.getScore() <= -1 && cached.getAnswerCount() == 0 && !cached.isLocked()) ||
 			   /* RemoveMigrationStubs */
-				(age > 30 && cached.isMigrated()) ||
+				(age >= 30 && cached.isMigrated()) ||
 			   /* RemoveAbandonedQuestions */
-				(age > 365 && cached.getScore() == 0 && cached.getAnswerCount() == 0 && !cached.isLocked() && 
+				(age >= 365 && cached.getScore() == 0 && cached.getAnswerCount() == 0 && !cached.isLocked() && 
 				 cached.getViewCount() <= 1.5 * age && cached.getCommentCount() <= 1
 				) ||
 			   /* RemoveAbandonedClosed */
-				(cached.getClosedDate() != null && DAYS.between(cached.getClosedDate(), Instant.now()) > 9 && 
+				(cached.getClosedDate() != null && DAYS.between(cached.getClosedDate(), Instant.now()) >= 9 && 
 				 !cached.isClosedAsDuplicate() && cached.getScore() <= 0 && !cached.isLocked() && !cached.isAnswered() && 
 				 !cached.isWithAcceptedAnswer() && cached.getReopenVoteCount() == 0 && 
-				 (cached.getLastEditDate() == null || DAYS.between(cached.getLastEditDate(), Instant.now()) > 9)
+				 (cached.getLastEditDate() == null || DAYS.between(cached.getLastEditDate(), Instant.now()) >= 9)
 				);
 	}
 	
