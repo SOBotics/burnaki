@@ -43,7 +43,7 @@ public class StartTagCommand implements Command {
 
 	@Override
 	public String getUsage() {
-		return "start tag [tag] [roomId] [link to Meta]";
+		return "start tag [tag] [roomId] [Meta]";
 	}
 
 	@Override
