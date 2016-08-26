@@ -1,10 +1,14 @@
 package fr.tunaki.stackoverflow.burnaki.bot.command;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import fr.tunaki.stackoverflow.burnaki.bot.Burnaki;
@@ -14,13 +18,16 @@ import fr.tunaki.stackoverflow.chat.Room;
 @Component
 public class CommandsCommand implements Command {
 	
+    @Autowired
+    private ApplicationContext applicationContext;
+	
 	private List<Command> commands;
 	
-	@Autowired
-	public CommandsCommand(List<Command> commands) {
-		this.commands = commands;
-	}
-
+    @PostConstruct
+    private void init() {
+    	commands = new ArrayList<>(applicationContext.getBeansOfType(Command.class).values());
+    }
+	
 	@Override
 	public String getName() {
 		return "commands";
