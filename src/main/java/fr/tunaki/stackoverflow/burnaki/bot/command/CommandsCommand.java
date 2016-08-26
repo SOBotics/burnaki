@@ -1,7 +1,6 @@
 package fr.tunaki.stackoverflow.burnaki.bot.command;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
@@ -21,11 +20,11 @@ public class CommandsCommand implements Command {
     @Autowired
     private ApplicationContext applicationContext;
 	
-	private List<Command> commands;
+	private Collection<Command> commands;
 	
     @PostConstruct
     private void init() {
-    	commands = new ArrayList<>(applicationContext.getBeansOfType(Command.class).values());
+    	commands = applicationContext.getBeansOfType(Command.class).values();
     }
 	
 	@Override
