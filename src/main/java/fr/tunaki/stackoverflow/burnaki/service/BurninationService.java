@@ -130,11 +130,13 @@ public class BurninationService {
 	
 	public List<BurninationQuestion> getDeleteCandidates(String tag) {
 		Burnination burnination = getCurrentBurninationForTag(tag);
-		return burnination.getQuestions().stream().filter(
-				q -> q.getScore() <= -2 && 
+		return burnination.getQuestions().stream().filter(q -> 
+				(q.getScore() <= -2 && 
 				q.getClosedDate() != null && 
+				!q.isManuallyDeleted() && !q.isRoombad() &&
 				DAYS.between(q.getClosedDate(), Instant.now()) >= 2 && 
-				q.getAnswerCount() > 0
+				q.getAnswerCount() > 0) ||
+				q.getDeleteVoteCount() > 0
 		).collect(Collectors.toList());
 	}
 
