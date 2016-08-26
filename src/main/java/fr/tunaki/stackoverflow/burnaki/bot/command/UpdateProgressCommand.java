@@ -31,7 +31,7 @@ public class UpdateProgressCommand implements Command {
 
 	@Override
 	public String getDescription() {
-		return "Force an update of the current progress of the tag's burnination. The tag can be omitted if ran inside the dedicated burn room.";
+		return "Forces an update of the progress of the burnination. The tag can be omitted if ran inside the dedicated burn room.";
 	}
 
 	@Override

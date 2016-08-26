@@ -52,7 +52,7 @@ public class DeleteCandidatesCommand implements Command {
 
 	@Override
 	public String getDescription() {
-		return "Returns delete candidates, along with posts having delete votes. The tag can be omitted if ran inside the dedicated burn room.";
+		return "Returns delete candidates and posts having delete votes. The tag can be omitted if ran inside the dedicated burn room.";
 	}
 
 	@Override
