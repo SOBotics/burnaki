@@ -24,6 +24,9 @@ public class SEApiQuestionCache implements Serializable {
 	@Column(name = "share_link", nullable = false, length = 255)
 	private String shareLink;
 	
+	@Column(name = "link", nullable = false, length = 255)
+	private String link;
+	
 	@Column(name = "created_date", nullable = false)
 	private Instant createdDate;
 	
@@ -57,8 +60,8 @@ public class SEApiQuestionCache implements Serializable {
 	@Column(name = "answered", nullable = false)
 	private boolean answered;
 	
-	@Column(name = "with_accepted_answer", nullable = false)
-	private boolean withAcceptedAnswer;
+	@Column(name = "accepted_answer_id")
+	private Integer acceptedAnswerId;
 	
 	@Column(name = "close_vote_count", nullable = false)
 	private int closeVoteCount;
@@ -86,6 +89,14 @@ public class SEApiQuestionCache implements Serializable {
 
 	public void setTitle(String title) {
 		this.title = title;
+	}
+
+	public String getLink() {
+		return link;
+	}
+
+	public void setLink(String link) {
+		this.link = link;
 	}
 
 	public String getShareLink() {
@@ -184,12 +195,12 @@ public class SEApiQuestionCache implements Serializable {
 		this.answered = answered;
 	}
 
-	public boolean isWithAcceptedAnswer() {
-		return withAcceptedAnswer;
+	public Integer getAcceptedAnswerId() {
+		return acceptedAnswerId;
 	}
 
-	public void setWithAcceptedAnswer(boolean withAcceptedAnswer) {
-		this.withAcceptedAnswer = withAcceptedAnswer;
+	public void setAcceptedAnswerId(Integer acceptedAnswerId) {
+		this.acceptedAnswerId = acceptedAnswerId;
 	}
 
 	public int getReopenVoteCount() {

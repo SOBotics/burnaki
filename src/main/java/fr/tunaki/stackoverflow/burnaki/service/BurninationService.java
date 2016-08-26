@@ -1,5 +1,6 @@
 package fr.tunaki.stackoverflow.burnaki.service;
 
+import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.reverseOrder;
 
@@ -126,11 +127,22 @@ public class BurninationService {
 	public Map<Integer, String> getBurnRooms() {
 		return repository.findByEndDateNull().collect(Collectors.toMap(Burnination::getRoomId, Burnination::getTag));
 	}
+	
+	public List<BurninationQuestion> getDeleteCandidates(String tag) {
+		Burnination burnination = getCurrentBurninationForTag(tag);
+		return burnination.getQuestions().stream().filter(
+				q -> q.getScore() <= -2 && 
+				q.getClosedDate() != null && 
+				DAYS.between(q.getClosedDate(), Instant.now()) >= 2 && 
+				q.getAnswerCount() > 0
+		).collect(Collectors.toList());
+	}
 
 	private List<BurninationUpdateEvent> populateBurninationQuestion(Question question, BurninationQuestion burninationQuestion, String tag) {
 		List<BurninationUpdateEvent> events = new ArrayList<>();
 		burninationQuestion.setCreatedDate(question.getCreatedDate());
 		
+		burninationQuestion.setClosedDate(question.getClosedDate());
 		if (question.getClosedDate() != null) {
 			if (!burninationQuestion.isClosed()) {
 				burninationQuestion.addHistory(new BurninationQuestionHistory(burninationQuestion, "CLOSED", question.getClosedDate()));
@@ -193,6 +205,14 @@ public class BurninationService {
 			burninationQuestion.setManuallyDeleted(false);
 			burninationQuestion.setRoombad(false);
 		}
+		
+		burninationQuestion.setAcceptedAnswerId(question.getAcceptedAnswerId());
+		burninationQuestion.setAnswerCount(question.getAnswerCount());
+		burninationQuestion.setLink(question.getLink());
+		burninationQuestion.setScore(question.getScore());
+		burninationQuestion.setTitle(question.getTitle());
+		burninationQuestion.setViewCount(question.getViewCount());
+		
 		return events;
 	}
 

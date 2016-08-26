@@ -112,7 +112,7 @@ public class StackExchangeAPIService {
 			   /* RemoveAbandonedClosed */
 				(cached.getClosedDate() != null && DAYS.between(cached.getClosedDate(), Instant.now()) >= 9 && 
 				 !cached.isClosedAsDuplicate() && cached.getScore() <= 0 && !cached.isLocked() && !cached.isAnswered() && 
-				 !cached.isWithAcceptedAnswer() && cached.getReopenVoteCount() == 0 && 
+				 cached.getAcceptedAnswerId() == null && cached.getReopenVoteCount() == 0 && 
 				 (cached.getLastEditDate() == null || DAYS.between(cached.getLastEditDate(), Instant.now()) >= 9)
 				);
 	}
@@ -172,6 +172,11 @@ public class StackExchangeAPIService {
 		question.setShareLink(cached.getShareLink());
 		question.setTags(Arrays.asList(cached.getTags().split(",")));
 		question.setTitle(cached.getTitle());
+		question.setAnswerCount(cached.getAnswerCount());
+		question.setLink(cached.getLink());
+		question.setScore(cached.getScore());
+		question.setViewCount(cached.getViewCount());
+		question.setAcceptedAnswerId(cached.getAcceptedAnswerId());
 		return question;
 	}
 
@@ -195,6 +200,12 @@ public class StackExchangeAPIService {
 		if (object.has("last_editor")) {
 			question.setLastEditor(toShallowUser(object.get("last_editor").getAsJsonObject()));
 		}
+		if (object.has("accepted_answer_id")) {
+			question.setAcceptedAnswerId(object.get("accepted_answer_id").getAsInt());
+		}
+		question.setAnswerCount(object.get("answer_count").getAsInt());
+		question.setScore(object.get("score").getAsInt());
+		question.setViewCount(object.get("view_count").getAsInt());
 		return question;
 	}
 	
@@ -220,10 +231,13 @@ public class StackExchangeAPIService {
 		questionCache.setReopenVoteCount(object.get("reopen_vote_count").getAsInt());
 		questionCache.setScore(object.get("score").getAsInt());
 		questionCache.setShareLink(object.get("share_link").getAsString());
+		questionCache.setLink(object.get("link").getAsString());
 		questionCache.setTags(StreamSupport.stream(object.get("tags").getAsJsonArray().spliterator(), false).map(JsonElement::getAsString).collect(Collectors.joining(",")));
 		questionCache.setTitle(Parser.unescapeEntities(object.get("title").getAsString(), false));
 		questionCache.setViewCount(object.get("view_count").getAsInt());
-		questionCache.setWithAcceptedAnswer(object.has("accepted_answer_id"));
+		if (object.has("accepted_answer_id")) {
+			questionCache.setAcceptedAnswerId(object.get("accepted_answer_id").getAsInt());
+		}
 		return questionCache;
 	}
 	

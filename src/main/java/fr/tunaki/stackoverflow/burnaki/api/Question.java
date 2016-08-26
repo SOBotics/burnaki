@@ -21,6 +21,10 @@ public class Question {
 	private boolean roombad;
 	private Instant lastEditDate;
 	private ShallowUser lastEditor;
+	private Integer acceptedAnswerId;
+	private int answerCount;
+	private int score;
+	private int viewCount;
 
 	public int getId() {
 		return id;
@@ -140,6 +144,38 @@ public class Question {
 
 	public boolean hasTag(String tag) {
 		return tags.contains(tag);
+	}
+
+	public Integer getAcceptedAnswerId() {
+		return acceptedAnswerId;
+	}
+
+	public void setAcceptedAnswerId(Integer acceptedAnswerId) {
+		this.acceptedAnswerId = acceptedAnswerId;
+	}
+
+	public int getAnswerCount() {
+		return answerCount;
+	}
+
+	public void setAnswerCount(int answerCount) {
+		this.answerCount = answerCount;
+	}
+
+	public int getScore() {
+		return score;
+	}
+
+	public void setScore(int score) {
+		this.score = score;
+	}
+
+	public int getViewCount() {
+		return viewCount;
+	}
+
+	public void setViewCount(int viewCount) {
+		this.viewCount = viewCount;
 	}
 
 }

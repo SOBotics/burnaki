@@ -38,6 +38,9 @@ public class BurninationQuestion implements Serializable {
 	@Column(name = "created_date", nullable = false, length = 19)
 	private Instant createdDate;
 	
+	@Column(name = "closed_date", length = 19)
+	private Instant closedDate;
+	
 	@Column(name = "close_vote_count", nullable = false)
 	private int closeVoteCount;
 	
@@ -61,6 +64,24 @@ public class BurninationQuestion implements Serializable {
 	
 	@Column(name = "retagged", nullable = false)
 	private boolean retagged;
+	
+	@Column(name = "link", nullable = false, length = 255)
+	private String link;
+	
+	@Column(name = "title", nullable = false, length = 250)
+	private String title;
+	
+	@Column(name = "score", nullable = false)
+	private int score;
+	
+	@Column(name = "view_count", nullable = false)
+	private int viewCount;
+	
+	@Column(name = "answer_count", nullable = false)
+	private int answerCount;
+	
+	@Column(name = "accepted_answer_id")
+	private Integer acceptedAnswerId;
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "burninationQuestion", cascade = CascadeType.ALL)
 	private List<BurninationQuestionHistory> histories = new ArrayList<>();
@@ -91,6 +112,14 @@ public class BurninationQuestion implements Serializable {
 
 	public void setCreatedDate(Instant createdDate) {
 		this.createdDate = createdDate;
+	}
+
+	public Instant getClosedDate() {
+		return closedDate;
+	}
+
+	public void setClosedDate(Instant closedDate) {
+		this.closedDate = closedDate;
 	}
 
 	public int getCloseVoteCount() {
@@ -164,6 +193,54 @@ public class BurninationQuestion implements Serializable {
 	public void addHistory(BurninationQuestionHistory burninationQuestionHistory) {
 		histories.add(burninationQuestionHistory);
 		burninationQuestionHistory.setBurninationQuestion(this);
+	}
+
+	public String getLink() {
+		return link;
+	}
+
+	public void setLink(String link) {
+		this.link = link;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public int getScore() {
+		return score;
+	}
+
+	public void setScore(int score) {
+		this.score = score;
+	}
+
+	public int getViewCount() {
+		return viewCount;
+	}
+
+	public void setViewCount(int viewCount) {
+		this.viewCount = viewCount;
+	}
+
+	public int getAnswerCount() {
+		return answerCount;
+	}
+
+	public void setAnswerCount(int answerCount) {
+		this.answerCount = answerCount;
+	}
+
+	public Integer getAcceptedAnswerId() {
+		return acceptedAnswerId;
+	}
+
+	public void setAcceptedAnswerId(Integer acceptedAnswerId) {
+		this.acceptedAnswerId = acceptedAnswerId;
 	}
 
 }
