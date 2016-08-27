@@ -12,11 +12,23 @@ Optional: post automatically a community-wiki answer with a predefined-template?
 
 ###`@burnaki get progress [tag]`
 
-This command outputs the current progress of the burnination: number of opened questions / number of closed questions / number of questions with close-votes / number of questions with delete-votes.
+This command outputs the current progress of the burnination: number of opened questions / number of closed questions / number of retagged questions / number of deleted questions (either manually or by the roomba). An example message is:
+
+> Here's a recap of the efforts so far for [godaddy]: Total questions (1563), Retagged (261), Closed (1213), Roombad (287), Manually deleted (101).
+
+It also prints a graph of the progress:
+
+![Burnination progress](http://i.stack.imgur.com/O3TPr.png)
 
 ###`@burnaki update progress [tag]`
 
-Optional: update automatically the community-wiki answer posted when the burnination started?
+The progress is updated automatically every hour. This command forces an update of the progress immediatly.
+
+###`@burnaki delete candidates [tag]`
+
+This command queries all posts that are eligible for deletion. It queries posts that have a score <= -2, are closed since more than 2 days and have at least one answer. It also returns posts with pending delete votes.
+
+![Sample list](http://i.stack.imgur.com/dUlb8.png)
 
 ###`@burnaki stop tag [tag]`
 
@@ -24,20 +36,18 @@ This command ends the burnination process of the given tag. No new notifications
 
 ##Notifications
 
-During a burnination process, notifications will be sent to the configured chat rooms:
+During a burnination process of a tag, notifications will be sent to the dedicated chat room:
 
  - When a question has been closed. The goal is to ensure the question gets attraction for a potential inappropriate close.
  - When a reopen vote is cast on a closed question. This means that the question was potentially wrongly closed during the effort and needs to be re-reviewed.
- - When an edit is made to a question. This helps to track which questions were edited by whom and potentially warn wrong edits or users on an edit-spree. Focus only on tag edits removing the burning tag?
- - When a delete vote is cast on a closed question.
- - When an undelete vote is cast on a deleted question. This means that the questions was potentially wrongly deleted and needs another review.
+ - When an edit is made to a question removing the tag being burninated. This helps to track which questions were edited and potentially act on wrong edits or users on an edit-spree.
+ - When a question is deleted. In the same way as closed questions, the goal is to make sure the question gets another review.
+ - When a question is undeleted. This means that the questions was wrongly deleted and needs another review. _NOTE: the Stack Exchange API does not return deleted posts, so it is not possible to raise a notification when an undelete vote is cast_.
  - When a new question is posted in the tags currently in burnination.
 
-Notifications will be sent by batches every 5 (?) minutes.
+Notifications are sent by batches every 5 minutes. An example is:
 
-##Web interface
-
-Print nice progress graphs?
+> Closed: [Codeigniter on Godaddy results in 404 removing index.php](http://stackoverflow.com/q/20163488), [GoDaddy issues with directory (differences with "webroot" and "root")](http://stackoverflow.com/q/20528283), [godaddy shared hosting NICE command path and PHP path](http://stackoverflow.com/q/19869437). 
 
 ##Database schema
 
