@@ -34,6 +34,9 @@ public class Burnination implements Serializable {
 	@Column(name = "end_date")
 	private Instant endDate;
 
+	@Column(name = "last_refresh_date")
+	private Instant lastRefreshDate;
+
 	@Column(name = "meta_link", nullable = false)
 	private String metaLink;
 
@@ -89,6 +92,14 @@ public class Burnination implements Serializable {
 
 	public void setRoomId(int roomId) {
 		this.roomId = roomId;
+	}
+
+	public Instant getLastRefreshDate() {
+		return lastRefreshDate;
+	}
+
+	public void setLastRefreshDate(Instant lastRefreshDate) {
+		this.lastRefreshDate = lastRefreshDate;
 	}
 
 	public List<BurninationProgress> getProgresses() {

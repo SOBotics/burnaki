@@ -69,7 +69,7 @@ public class BurninationService {
 		return size;
 	}
 
-	public List<BurninationUpdateEvent> update(String tag, int refreshEvery) {
+	public List<BurninationUpdateEvent> update(String tag) {
 		Burnination burnination = getCurrentBurninationForTag(tag);
 		LOGGER.debug("Updating the burnination of tag [{}]", tag);
 		List<BurninationUpdateEvent> events = new ArrayList<>();
@@ -104,8 +104,9 @@ public class BurninationService {
 			events.addAll(populateBurninationQuestion(question, burninationQuestion, tag));
 		}
 
-		// add to burn list new questions posted in burn tag since last refresh
-		for (Question question : apiService.getQuestionsInTag(tag, Instant.now().minus(refreshEvery, ChronoUnit.MINUTES)).stream().filter(q -> !presentMap.containsKey(q.getId())).collect(Collectors.toList())) {
+		// add to burn list new questions posted in burn tag since last refresh (minus 5 minutes to account for the delay of doing all this work)
+		Instant from = burnination.getLastRefreshDate() == null ? null : burnination.getLastRefreshDate().minus(5, ChronoUnit.MINUTES);
+		for (Question question : apiService.getQuestionsInTag(tag, from).stream().filter(q -> !presentMap.containsKey(q.getId())).collect(Collectors.toList())) {
 			LOGGER.debug("New question with id {} asked in tag under burnination [{}]", question.getId(), tag);
 			BurninationQuestion burninationQuestion = new BurninationQuestion(burnination, question.getId());
 			burnination.addQuestion(burninationQuestion);
@@ -113,6 +114,7 @@ public class BurninationService {
 			populateBurninationQuestion(question, burninationQuestion, tag);
 		}
 
+		burnination.setLastRefreshDate(Instant.now());
 		repository.save(burnination);
 		return events;
 	}
@@ -178,7 +180,7 @@ public class BurninationService {
 	public List<BurninationQuestion> getDeleteCandidates(String tag) {
 		Burnination burnination = getCurrentBurninationForTag(tag);
 		return burnination.getQuestions().stream().filter(q -> q.getDeletedDate() == null && (
-				(q.getScore() <= -2 &&
+				(q.getScore() <= -1 &&
 				q.getClosedDate() != null &&
 				DAYS.between(q.getClosedDate(), Instant.now()) >= 2 &&
 				q.getAnswerCount() > 0) ||

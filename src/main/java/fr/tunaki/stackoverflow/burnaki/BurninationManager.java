@@ -68,7 +68,7 @@ public class BurninationManager implements Closeable, InitializingBean {
 		tasks.computeIfAbsent(tag, t -> Arrays.asList(
 			executorService.scheduleAtFixedRate(() -> {
 				try {
-					List<BurninationUpdateEvent> events = burninationService.update(t, refreshQuestionsEvery);
+					List<BurninationUpdateEvent> events = burninationService.update(t);
 					LOGGER.debug("Update task finished with {} new events: {}. Listeners: {}", events.size(), events, listeners);
 					listeners.forEach(l -> listenerExecutor.submit(() -> l.onUpdate(events)));
 				} catch (Exception e) {
