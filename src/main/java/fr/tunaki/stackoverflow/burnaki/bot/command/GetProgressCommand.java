@@ -1,10 +1,11 @@
 package fr.tunaki.stackoverflow.burnaki.bot.command;
 
 import java.awt.Color;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -95,19 +96,19 @@ public class GetProgressCommand implements Command {
 		chart.addSeries("Closed", xClosedData, yClosedData).setMarker(SeriesMarkers.CIRCLE).setMarkerColor(Color.ORANGE).setLineWidth(0.5f);
 
 		Path path;
-		FileInputStream fis;
+		InputStream is;
 		try {
 			path = Files.createTempFile("burnaki", ".png");
 			BitmapEncoder.saveBitmapWithDPI(chart, path.toFile().getAbsolutePath(), BitmapFormat.PNG, 300);
-			fis = new FileInputStream(path.toFile());
+			is = Files.newInputStream(path, StandardOpenOption.DELETE_ON_CLOSE);
 		} catch (IOException e) {
 			LOGGER.error("Error while computing the progress graph :(", e);
 			room.send("Error while computing the progress graph :(, issue was " + e.getMessage());
 			return;
 		}
-		room.uploadImage(path.getFileName().toString(), fis).whenComplete((url, t) -> {
+		room.uploadImage(path.getFileName().toString(), is).whenComplete((url, t) -> {
 			try {
-				fis.close();
+				is.close();
 			} catch (IOException e) { }
 			if (t == null) {
 				room.send(url);
