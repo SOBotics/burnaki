@@ -2,7 +2,6 @@ package fr.tunaki.stackoverflow.burnaki.service;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.Comparator.comparing;
-import static java.util.Comparator.reverseOrder;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -155,8 +154,8 @@ public class BurninationService {
 		repository.save(burnination);
 	}
 
-	public BurninationProgress getProgress(String tag) {
-		return getCurrentBurninationForTag(tag).getProgresses().stream().sorted(comparing(e -> e.getId().getProgressDate(), reverseOrder())).findFirst().orElse(null);
+	public List<BurninationProgress> getProgress(String tag) {
+		return getCurrentBurninationForTag(tag).getProgresses().stream().sorted(comparing(e -> e.getId().getProgressDate())).collect(Collectors.toList());
 	}
 
 	public void stop(String tag) {

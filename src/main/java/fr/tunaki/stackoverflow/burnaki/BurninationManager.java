@@ -89,7 +89,7 @@ public class BurninationManager implements Closeable, InitializingBean {
 		burninationService.updateProgress(tag);
 	}
 
-	public BurninationProgress getProgress(String tag) {
+	public List<BurninationProgress> getProgress(String tag) {
 		return burninationService.getProgress(tag);
 	}
 
