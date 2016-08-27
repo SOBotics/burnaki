@@ -84,21 +84,25 @@ public class GetProgressCommand implements Command {
 		room.send("Here's a recap of the efforts so far for \\[" + tag + "\\]: Total questions (" + latest.getTotalQuestions() + "), Retagged (" + latest.getRetagged() + "), Closed (" + latest.getClosed() + "), Roombad (" + latest.getRoombad() + "), Manually deleted (" + latest.getManuallyDeleted() + ").");
 
 		room.send("Here are some nice images...");
-		List<Date> xClosedData = new ArrayList<>(), xRemainingData = new ArrayList<>();
-		List<Integer> yClosedData = new ArrayList<>(), yRemainingData = new ArrayList<>();
+		List<Date> x = new ArrayList<>();
+		List<Integer> yClosed = new ArrayList<>(), yRemaining = new ArrayList<>(), yRetagged = new ArrayList<>(), yDeleted = new ArrayList<>(), yRoombad = new ArrayList<>();
 		for (BurninationProgress progress : progresses) {
-			Date date = Date.from(progress.getId().getProgressDate());
-			xClosedData.add(date);
-			yClosedData.add(progress.getClosed());
-			xRemainingData.add(date);
-			yRemainingData.add(progress.getOpenedWithTag());
+			x.add(Date.from(progress.getId().getProgressDate()));
+			yClosed.add(progress.getClosed());
+			yRemaining.add(progress.getOpenedWithTag());
+			yRetagged.add(progress.getRetagged());
+			yDeleted.add(progress.getManuallyDeleted());
+			yRoombad.add(progress.getRoombad());
 		}
 
 		XYChart chart = new XYChartBuilder().width(500).height(400).title("Burnination progress").xAxisTitle("Time").yAxisTitle("Number of questions").build();
 		chart.getStyler().setChartBackgroundColor(Color.WHITE);
-		chart.getStyler().setDatePattern("dd/MM").setMarkerSize(4).setPlotGridVerticalLinesVisible(false);
-		chart.addSeries("Closed", xClosedData, yClosedData).setMarker(SeriesMarkers.CIRCLE).setMarkerColor(Color.ORANGE).setLineWidth(0.5f).setLineColor(XChartSeriesColors.BLUE);
-		chart.addSeries("Remaining", xRemainingData, yRemainingData).setMarker(SeriesMarkers.CIRCLE).setMarkerColor(Color.RED).setLineWidth(0.5f).setLineColor(XChartSeriesColors.BLUE);
+		chart.getStyler().setDatePattern("dd/MM").setMarkerSize(4).setPlotGridVerticalLinesVisible(false).setYAxisMin(0);
+		chart.addSeries("Closed", x, yClosed).setMarker(SeriesMarkers.CIRCLE).setMarkerColor(Color.ORANGE).setLineWidth(0.5f).setLineColor(XChartSeriesColors.BLUE);
+		chart.addSeries("Retagged", x, yRetagged).setMarker(SeriesMarkers.CIRCLE).setMarkerColor(Color.GREEN).setLineWidth(0.5f).setLineColor(XChartSeriesColors.BLUE);
+		chart.addSeries("Deleted", x, yDeleted).setMarker(SeriesMarkers.CIRCLE).setMarkerColor(Color.RED).setLineWidth(0.5f).setLineColor(XChartSeriesColors.BLUE);
+		chart.addSeries("Roombad", x, yRoombad).setMarker(SeriesMarkers.CIRCLE).setMarkerColor(Color.MAGENTA).setLineWidth(0.5f).setLineColor(XChartSeriesColors.BLUE);
+		chart.addSeries("Remaining", x, yRemaining).setMarker(SeriesMarkers.CIRCLE).setMarkerColor(Color.BLACK).setLineWidth(0.5f).setLineColor(XChartSeriesColors.BLUE);
 
 		Path path;
 		InputStream is;
