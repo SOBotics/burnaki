@@ -89,30 +89,30 @@ public class GetProgressCommand implements Command {
 			yClosedData.add(progress.getClosed());
 		}
 
-	    XYChart chart = new XYChartBuilder().width(500).height(400).title("Burnination progress").xAxisTitle("Time").yAxisTitle("Number of questions").build();
-	    chart.getStyler().setChartBackgroundColor(Color.WHITE);
-	    chart.getStyler().setDatePattern("dd/MM").setMarkerSize(4).setPlotGridVerticalLinesVisible(false);
-	    chart.addSeries("Closed", xClosedData, yClosedData).setMarker(SeriesMarkers.CIRCLE).setMarkerColor(Color.ORANGE).setLineWidth(0.5f);
+		XYChart chart = new XYChartBuilder().width(500).height(400).title("Burnination progress").xAxisTitle("Time").yAxisTitle("Number of questions").build();
+		chart.getStyler().setChartBackgroundColor(Color.WHITE);
+		chart.getStyler().setDatePattern("dd/MM").setMarkerSize(4).setPlotGridVerticalLinesVisible(false);
+		chart.addSeries("Closed", xClosedData, yClosedData).setMarker(SeriesMarkers.CIRCLE).setMarkerColor(Color.ORANGE).setLineWidth(0.5f);
 
-	    Path path;
-	    FileInputStream fis;
-	    try {
-	    	path = Files.createTempFile("burnaki", ".png");
-	    	BitmapEncoder.saveBitmapWithDPI(chart, path.toFile().getAbsolutePath(), BitmapFormat.PNG, 300);
-	    	fis = new FileInputStream(path.toFile());
-	    } catch (IOException e) {
-	    	LOGGER.error("Error while computing the progress graph :(", e);
-	    	room.send("Error while computing the progress graph :(, issue was " + e.getMessage());
-	    	return;
-	    }
-	    room.uploadImage(path.getFileName().toString(), fis).whenComplete((url, t) -> {
-	    	try {
-	    		fis.close();
-	    	} catch (IOException e) { }
-	    	if (t == null) {
-	    		room.send(url);
-	    	}
-	    });
+		Path path;
+		FileInputStream fis;
+		try {
+			path = Files.createTempFile("burnaki", ".png");
+			BitmapEncoder.saveBitmapWithDPI(chart, path.toFile().getAbsolutePath(), BitmapFormat.PNG, 300);
+			fis = new FileInputStream(path.toFile());
+		} catch (IOException e) {
+			LOGGER.error("Error while computing the progress graph :(", e);
+			room.send("Error while computing the progress graph :(, issue was " + e.getMessage());
+			return;
+		}
+		room.uploadImage(path.getFileName().toString(), fis).whenComplete((url, t) -> {
+			try {
+				fis.close();
+			} catch (IOException e) { }
+			if (t == null) {
+				room.send(url);
+			}
+		});
 	}
 
 }
