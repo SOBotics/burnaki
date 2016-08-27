@@ -1,6 +1,6 @@
 The purpose of this project is to monitor burnination efforts on the Stack Exchange network. It tracks the progress by watching for close votes / reopen votes / delete votes / edits made to questions on the burninated tag.
 
-It also involves a chat bot that posts notification in dedicated chat rooms.
+It also involves a chat bot that posts notifications in dedicated chat rooms.
 
 ##Chat bot
 
