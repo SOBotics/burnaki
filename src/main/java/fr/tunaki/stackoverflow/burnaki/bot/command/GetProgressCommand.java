@@ -15,6 +15,7 @@ import org.knowm.xchart.BitmapEncoder;
 import org.knowm.xchart.BitmapEncoder.BitmapFormat;
 import org.knowm.xchart.XYChart;
 import org.knowm.xchart.XYChartBuilder;
+import org.knowm.xchart.style.colors.XChartSeriesColors;
 import org.knowm.xchart.style.markers.SeriesMarkers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,17 +84,21 @@ public class GetProgressCommand implements Command {
 		room.send("Here's a recap of the efforts so far for \\[" + tag + "\\]: Total questions (" + latest.getTotalQuestions() + "), Retagged (" + latest.getRetagged() + "), Closed (" + latest.getClosed() + "), Roombad (" + latest.getRoombad() + "), Manually deleted (" + latest.getManuallyDeleted() + ").");
 
 		room.send("Here are some nice images...");
-		List<Date> xClosedData = new ArrayList<>();
-		List<Integer> yClosedData = new ArrayList<>();
+		List<Date> xClosedData = new ArrayList<>(), xRemainingData = new ArrayList<>();
+		List<Integer> yClosedData = new ArrayList<>(), yRemainingData = new ArrayList<>();
 		for (BurninationProgress progress : progresses) {
-			xClosedData.add(Date.from(progress.getId().getProgressDate()));
+			Date date = Date.from(progress.getId().getProgressDate());
+			xClosedData.add(date);
 			yClosedData.add(progress.getClosed());
+			xRemainingData.add(date);
+			yRemainingData.add(progress.getOpenedWithTag());
 		}
 
 		XYChart chart = new XYChartBuilder().width(500).height(400).title("Burnination progress").xAxisTitle("Time").yAxisTitle("Number of questions").build();
 		chart.getStyler().setChartBackgroundColor(Color.WHITE);
 		chart.getStyler().setDatePattern("dd/MM").setMarkerSize(4).setPlotGridVerticalLinesVisible(false);
-		chart.addSeries("Closed", xClosedData, yClosedData).setMarker(SeriesMarkers.CIRCLE).setMarkerColor(Color.ORANGE).setLineWidth(0.5f);
+		chart.addSeries("Closed", xClosedData, yClosedData).setMarker(SeriesMarkers.CIRCLE).setMarkerColor(Color.ORANGE).setLineWidth(0.5f).setLineColor(XChartSeriesColors.BLUE);
+		chart.addSeries("Remaining", xRemainingData, yRemainingData).setMarker(SeriesMarkers.CIRCLE).setMarkerColor(Color.RED).setLineWidth(0.5f).setLineColor(XChartSeriesColors.BLUE);
 
 		Path path;
 		InputStream is;

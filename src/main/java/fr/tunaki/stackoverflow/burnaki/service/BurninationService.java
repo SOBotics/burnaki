@@ -139,17 +139,19 @@ public class BurninationService {
 		Burnination burnination = getCurrentBurninationForTag(tag);
 		BurninationProgress burninationProgress = new BurninationProgress(burnination, Instant.now());
 		burnination.addProgress(burninationProgress);
-		int closed = 0, manuallyDeleted = 0, retagged = 0, roombad = 0;
+		int closed = 0, manuallyDeleted = 0, retagged = 0, roombad = 0, openedWithTag = 0;
 		for (BurninationQuestion question : burnination.getQuestions()) {
 			if (question.getClosedDate() != null) closed++;
 			if (question.isManuallyDeleted()) manuallyDeleted++;
 			if (question.isRetagged()) retagged++;
 			if (question.isRoombad()) roombad++;
+			if (question.getClosedDate() == null && !question.isRetagged()) openedWithTag++;
 		}
 		burninationProgress.setClosed(closed);
 		burninationProgress.setManuallyDeleted(manuallyDeleted);
 		burninationProgress.setRetagged(retagged);
 		burninationProgress.setRoombad(roombad);
+		burninationProgress.setOpenedWithTag(openedWithTag);
 		burninationProgress.setTotalQuestions(burnination.getQuestions().size());
 		repository.save(burnination);
 	}

@@ -46,6 +46,9 @@ public class BurninationProgress implements Serializable {
 	@Column(name = "retagged")
 	private int retagged;
 
+	@Column(name = "opened_with_tag")
+	private int openedWithTag;
+
 	public BurninationProgress() { }
 
 	public BurninationProgress(Burnination burnination, Instant progressDate) {
@@ -106,8 +109,12 @@ public class BurninationProgress implements Serializable {
 		this.retagged = retagged;
 	}
 
-	public int getRemaining() {
-		return totalQuestions - closed - retagged - manuallyDeleted - roombad;
+	public int getOpenedWithTag() {
+		return openedWithTag;
+	}
+
+	public void setOpenedWithTag(int openedWithTag) {
+		this.openedWithTag = openedWithTag;
 	}
 
 }
