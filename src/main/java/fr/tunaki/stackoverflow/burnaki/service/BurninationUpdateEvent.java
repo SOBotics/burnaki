@@ -5,7 +5,7 @@ import fr.tunaki.stackoverflow.burnaki.entity.BurninationQuestion;
 public class BurninationUpdateEvent {
 
 	public static enum Event {
-		CLOSED("Closed"), REOPEN_VOTE("Reopen vote"), RETAGGED_WITHOUT("Tag removed"), DELETED("Deleted"), UNDELETE_VOTE("Undelete vote"), NEW("New");
+		CLOSED("Closed"), REOPEN_VOTE("Reopen vote"), RETAGGED_WITHOUT("Tag removed"), DELETED("Deleted"), UNDELETED("Undeleted"), NEW("New");
 
 		private final String display;
 

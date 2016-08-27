@@ -208,10 +208,6 @@ public class BurninationService {
 
 		burninationQuestion.setReopenVoteCount(question.getReopenVoteCount());
 		burninationQuestion.setDeleteVoteCount(question.getDeleteVoteCount());
-
-		if (question.getUndeleteVoteCount() > 0 && burninationQuestion.getUndeleteVoteCount() == 0) {
-			events.add(new BurninationUpdateEvent(BurninationUpdateEvent.Event.UNDELETE_VOTE, tag, burninationQuestion));
-		}
 		burninationQuestion.setUndeleteVoteCount(question.getUndeleteVoteCount());
 
 		if (question.getTags().contains(tag)) {
@@ -228,6 +224,7 @@ public class BurninationService {
 		}
 
 		if (burninationQuestion.getDeletedDate() != null) {
+			events.add(new BurninationUpdateEvent(BurninationUpdateEvent.Event.UNDELETED, tag, burninationQuestion));
 			burninationQuestion.addHistory(new BurninationQuestionHistory(burninationQuestion, "UNDELETED", Instant.now()));
 			burninationQuestion.setDeletedDate(null);
 		}
