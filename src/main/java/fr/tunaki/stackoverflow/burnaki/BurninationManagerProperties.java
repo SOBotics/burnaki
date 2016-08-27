@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties("burnination.scheduler")
 public class BurninationManagerProperties {
-	
+
 	private int refreshQuestionsEvery;
 	private int refreshProgressEvery;
 
@@ -23,5 +23,5 @@ public class BurninationManagerProperties {
 	public void setRefreshProgressEvery(int refreshProgressEvery) {
 		this.refreshProgressEvery = refreshProgressEvery;
 	}
-	
+
 }

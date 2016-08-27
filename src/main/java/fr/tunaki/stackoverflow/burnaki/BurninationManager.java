@@ -27,29 +27,29 @@ import fr.tunaki.stackoverflow.burnaki.service.BurninationUpdateListener;
 
 @Component
 public class BurninationManager implements Closeable, InitializingBean {
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(BurninationManager.class);
-	
+
 	private BurninationService burninationService;
 	private ScheduledExecutorService executorService;
 	private BurninationManagerProperties properties;
-	
+
 	private ExecutorService listenerExecutor = Executors.newCachedThreadPool();
 	private List<BurninationUpdateListener> listeners = new ArrayList<>();
-	
+
 	private Map<String, List<ScheduledFuture<?>>> tasks = new ConcurrentHashMap<>();
-	
+
 	@Autowired
 	public BurninationManager(ScheduledExecutorService executorService, BurninationService burninationService, BurninationManagerProperties properties) {
 		this.executorService = executorService;
 		this.burninationService = burninationService;
 		this.properties = properties;
 	}
-	
+
 	public void addListener(BurninationUpdateListener listener) {
 		listeners.add(listener);
 	}
-	
+
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		burninationService.getTagsInBurnination().forEach(this::scheduleTasks);
@@ -75,7 +75,7 @@ public class BurninationManager implements Closeable, InitializingBean {
 					LOGGER.error("Error while refreshing questions.", e);
 				}
 			}, refreshQuestionsEvery, refreshQuestionsEvery, TimeUnit.MINUTES),
-			executorService.scheduleAtFixedRate(() -> { 
+			executorService.scheduleAtFixedRate(() -> {
 				try {
 					burninationService.updateProgress(t);
 				} catch (Exception e) {
@@ -84,23 +84,23 @@ public class BurninationManager implements Closeable, InitializingBean {
 			}, refreshProgressEvery / 2, refreshProgressEvery, TimeUnit.MINUTES)
 		));
 	}
-	
+
 	public void updateProgressNow(String tag) {
 		burninationService.updateProgress(tag);
 	}
-	
+
 	public BurninationProgress getProgress(String tag) {
 		return burninationService.getProgress(tag);
 	}
-	
+
 	public List<BurninationQuestion> getDeleteCandidates(String tag) {
 		return burninationService.getDeleteCandidates(tag);
 	}
-	
+
 	public Map<Integer, String> getBurnRooms() {
 		return burninationService.getBurnRooms();
 	}
-	
+
 	public void stop(String tag) {
 		burninationService.stop(tag);
 		List<ScheduledFuture<?>> tagTasks = tasks.remove(tag);
@@ -108,7 +108,7 @@ public class BurninationManager implements Closeable, InitializingBean {
 			tagTasks.forEach(t -> t.cancel(false));
 		}
 	}
-	
+
 	@Override
 	public void close() throws IOException {
 		executorService.shutdownNow();

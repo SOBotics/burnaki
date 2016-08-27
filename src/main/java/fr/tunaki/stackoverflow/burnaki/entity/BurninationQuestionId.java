@@ -10,10 +10,10 @@ import javax.persistence.Embeddable;
 public class BurninationQuestionId implements Serializable {
 
 	private static final long serialVersionUID = 4619622582007916405L;
-	
+
 	@Column(name = "burnination_id", nullable = false)
 	private long burninationId;
-	
+
 	@Column(name = "question_id", nullable = false)
 	private int questionId;
 

@@ -12,9 +12,9 @@ import fr.tunaki.stackoverflow.chat.Room;
 
 @Component
 public class QuotaCommand implements Command {
-	
+
 	private StackExchangeAPIService apiService;
-	
+
 	@Autowired
 	public QuotaCommand(StackExchangeAPIService apiService) {
 		this.apiService = apiService;

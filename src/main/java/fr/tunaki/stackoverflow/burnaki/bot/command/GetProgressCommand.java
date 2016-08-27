@@ -15,16 +15,16 @@ import fr.tunaki.stackoverflow.chat.Room;
 
 @Component
 public class GetProgressCommand implements Command {
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(GetProgressCommand.class);
-	
+
 	private BurninationManager burninationManager;
-	
+
 	@Autowired
 	public GetProgressCommand(BurninationManager burninationManager) {
 		this.burninationManager = burninationManager;
 	}
-	
+
 	@Override
 	public String getName() {
 		return "get progress";

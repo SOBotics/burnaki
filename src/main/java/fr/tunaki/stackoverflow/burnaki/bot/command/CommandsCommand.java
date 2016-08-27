@@ -16,17 +16,17 @@ import fr.tunaki.stackoverflow.chat.Room;
 
 @Component
 public class CommandsCommand implements Command {
-	
+
     @Autowired
     private ApplicationContext applicationContext;
-	
+
 	private Collection<Command> commands;
-	
+
     @PostConstruct
     private void init() {
     	commands = applicationContext.getBeansOfType(Command.class).values();
     }
-	
+
 	@Override
 	public String getName() {
 		return "commands";

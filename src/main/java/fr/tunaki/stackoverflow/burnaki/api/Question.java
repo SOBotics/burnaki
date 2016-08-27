@@ -1,11 +1,10 @@
 package fr.tunaki.stackoverflow.burnaki.api;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 
 public class Question {
-	
+
 	private int id;
 	private String link;
 	private String shareLink;
@@ -17,14 +16,17 @@ public class Question {
 	private int undeleteVoteCount;
 	private Instant createdDate;
 	private Instant closedDate;
-	private Instant deletedDate; // not returned by API, calculated when it is noticed that question was deleted
-	private boolean roombad;
+	private Instant lockedDate;
 	private Instant lastEditDate;
 	private ShallowUser lastEditor;
 	private Integer acceptedAnswerId;
 	private int answerCount;
+	private int commentCount;
 	private int score;
 	private int viewCount;
+	private boolean answered;
+	private String closedReason;
+	private boolean migrated;
 
 	public int getId() {
 		return id;
@@ -106,14 +108,6 @@ public class Question {
 		this.closedDate = closedDate;
 	}
 
-	public Instant getDeletedDate() {
-		return deletedDate;
-	}
-
-	public void setDeletedDate(Instant deletedDate) {
-		this.deletedDate = deletedDate;
-	}
-
 	public Instant getLastEditDate() {
 		return lastEditDate;
 	}
@@ -130,20 +124,12 @@ public class Question {
 		this.lastEditor = lastEditor;
 	}
 
-	public boolean isRoombad() {
-		return roombad;
-	}
-
-	public void setRoombad(boolean roombad) {
-		this.roombad = roombad;
-	}
-	
 	public void setTags(List<String> tags) {
-		this.tags = new ArrayList<>(tags);
+		this.tags = tags;
 	}
 
-	public boolean hasTag(String tag) {
-		return tags.contains(tag);
+	public List<String> getTags() {
+		return tags;
 	}
 
 	public Integer getAcceptedAnswerId() {
@@ -162,6 +148,14 @@ public class Question {
 		this.answerCount = answerCount;
 	}
 
+	public int getCommentCount() {
+		return commentCount;
+	}
+
+	public void setCommentCount(int commentCount) {
+		this.commentCount = commentCount;
+	}
+
 	public int getScore() {
 		return score;
 	}
@@ -176,6 +170,38 @@ public class Question {
 
 	public void setViewCount(int viewCount) {
 		this.viewCount = viewCount;
+	}
+
+	public boolean isAnswered() {
+		return answered;
+	}
+
+	public void setAnswered(boolean answered) {
+		this.answered = answered;
+	}
+
+	public String getClosedReason() {
+		return closedReason;
+	}
+
+	public void setClosedReason(String closedReason) {
+		this.closedReason = closedReason;
+	}
+
+	public Instant getLockedDate() {
+		return lockedDate;
+	}
+
+	public void setLockedDate(Instant lockedDate) {
+		this.lockedDate = lockedDate;
+	}
+
+	public boolean isMigrated() {
+		return migrated;
+	}
+
+	public void setMigrated(boolean migrated) {
+		this.migrated = migrated;
 	}
 
 }

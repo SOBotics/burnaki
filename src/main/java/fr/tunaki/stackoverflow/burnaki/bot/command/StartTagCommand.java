@@ -17,13 +17,13 @@ import fr.tunaki.stackoverflow.chat.StackExchangeClient;
 
 @Component
 public class StartTagCommand implements Command {
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(StartTagCommand.class);
-	
+
 	private BurnakiProperties properties;
 	private BurninationManager burninationManager;
 	private StackExchangeClient client;
-	
+
 	@Autowired
 	public StartTagCommand(BurnakiProperties properties, BurninationManager burninationManager, StackExchangeClient client) {
 		this.properties = properties;

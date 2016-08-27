@@ -7,9 +7,11 @@ import static java.util.Comparator.reverseOrder;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -31,18 +33,18 @@ import fr.tunaki.stackoverflow.burnaki.repository.BurninationRepository;
 @Service
 @Transactional
 public class BurninationService {
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(BurninationService.class);
-	
+
 	private BurninationRepository repository;
 	private StackExchangeAPIService apiService;
-	
+
 	@Autowired
 	public BurninationService(BurninationRepository repository, StackExchangeAPIService apiService) {
 		this.repository = repository;
 		this.apiService = apiService;
 	}
-	
+
 	public int start(String tag, int roomId, String metaLink) {
 		Objects.requireNonNull(tag, "A tag must be given");
 		Objects.requireNonNull(metaLink, "A link to a Meta post must be given");
@@ -67,36 +69,80 @@ public class BurninationService {
 		repository.save(burnination);
 		return size;
 	}
-	
+
 	public List<BurninationUpdateEvent> update(String tag, int refreshEvery) {
 		Burnination burnination = getCurrentBurninationForTag(tag);
 		LOGGER.debug("Updating the burnination of tag [{}]", tag);
 		List<BurninationUpdateEvent> events = new ArrayList<>();
 		Map<Integer, BurninationQuestion> presentMap = burnination.getQuestions().stream().collect(Collectors.toMap(bq -> bq.getId().getQuestionId(), Function.identity()));
+		Set<Integer> keySet = presentMap.keySet();
+		List<Question> results = apiService.getQuestionsWithIds(keySet);
+
+		// identify deleted questions not returned by API (those for which the ID was given but nothing was returned)
+		Set<Integer> returnedIds = results.stream().map(t -> t.getId()).collect(Collectors.toSet());
+		Map<Integer, BurninationQuestion> deltas = new HashMap<>(presentMap);
+		deltas.keySet().removeAll(returnedIds);
+		for (BurninationQuestion bq : deltas.values()) {
+			if (bq.getDeletedDate() == null) {
+				bq.setDeletedDate(Instant.now());
+				if (wasProbablyRoombad(bq)) {
+					bq.addHistory(new BurninationQuestionHistory(bq, "ROOMBAD", bq.getDeletedDate()));
+					events.add(new BurninationUpdateEvent(BurninationUpdateEvent.Event.DELETED, tag, bq));
+					bq.setRoombad(true);
+					bq.setManuallyDeleted(false);
+				} else {
+					bq.addHistory(new BurninationQuestionHistory(bq, "MANUALLY DELETED", bq.getDeletedDate()));
+					events.add(new BurninationUpdateEvent(BurninationUpdateEvent.Event.DELETED, tag, bq));
+					bq.setRoombad(false);
+					bq.setManuallyDeleted(true);
+				}
+			}
+		}
+
 		// update questions in the current burn list
-		for (Question question : apiService.getQuestionsWithIds(presentMap.keySet())) {
+		for (Question question : results) {
 			BurninationQuestion burninationQuestion = presentMap.get(question.getId());
 			events.addAll(populateBurninationQuestion(question, burninationQuestion, tag));
 		}
+
 		// add to burn list new questions posted in burn tag since last refresh
 		for (Question question : apiService.getQuestionsInTag(tag, Instant.now().minus(refreshEvery, ChronoUnit.MINUTES)).stream().filter(q -> !presentMap.containsKey(q.getId())).collect(Collectors.toList())) {
 			LOGGER.debug("New question with id {} asked in tag under burnination [{}]", question.getId(), tag);
 			BurninationQuestion burninationQuestion = new BurninationQuestion(burnination, question.getId());
 			burnination.addQuestion(burninationQuestion);
-			events.add(new BurninationUpdateEvent(BurninationUpdateEvent.Event.NEW, tag, question));
+			events.add(new BurninationUpdateEvent(BurninationUpdateEvent.Event.NEW, tag, burninationQuestion));
 			populateBurninationQuestion(question, burninationQuestion, tag);
 		}
+
 		repository.save(burnination);
 		return events;
 	}
-	
+
+	private boolean wasProbablyRoombad(BurninationQuestion bq) {
+		long age = DAYS.between(bq.getCreatedDate(), Instant.now());
+		return /* RemoveDeadQuestions */
+				(age >= 30 && bq.getScore() <= -1 && bq.getAnswerCount() == 0 && !bq.isLocked()) ||
+			   /* RemoveMigrationStubs */
+				(age >= 30 && bq.isMigrated()) ||
+			   /* RemoveAbandonedQuestions */
+				(age >= 365 && bq.getScore() == 0 && bq.getAnswerCount() == 0 && !bq.isLocked() &&
+				 bq.getViewCount() <= 1.5 * age && bq.getCommentCount() <= 1
+				) ||
+			   /* RemoveAbandonedClosed */
+				(bq.getClosedDate() != null && DAYS.between(bq.getClosedDate(), Instant.now()) >= 9 &&
+				 !bq.isClosedAsDuplicate() && bq.getScore() <= 0 && !bq.isLocked() && !bq.isAnswered() &&
+				 bq.getAcceptedAnswerId() == null && bq.getReopenVoteCount() == 0 &&
+				 (bq.getLastEditDate() == null || DAYS.between(bq.getLastEditDate(), Instant.now()) >= 9)
+				);
+	}
+
 	public void updateProgress(String tag) {
 		Burnination burnination = getCurrentBurninationForTag(tag);
 		BurninationProgress burninationProgress = new BurninationProgress(burnination, Instant.now());
 		burnination.addProgress(burninationProgress);
 		int closed = 0, manuallyDeleted = 0, retagged = 0, roombad = 0;
 		for (BurninationQuestion question : burnination.getQuestions()) {
-			if (question.isClosed()) closed++;
+			if (question.getClosedDate() != null) closed++;
 			if (question.isManuallyDeleted()) manuallyDeleted++;
 			if (question.isRetagged()) retagged++;
 			if (question.isRoombad()) roombad++;
@@ -108,7 +154,7 @@ public class BurninationService {
 		burninationProgress.setTotalQuestions(burnination.getQuestions().size());
 		repository.save(burnination);
 	}
-	
+
 	public BurninationProgress getProgress(String tag) {
 		return getCurrentBurninationForTag(tag).getProgresses().stream().sorted(comparing(e -> e.getId().getProgressDate(), reverseOrder())).findFirst().orElse(null);
 	}
@@ -119,59 +165,55 @@ public class BurninationService {
 		burnination.setEndDate(Instant.now());
 		repository.save(burnination);
 	}
-	
+
 	public List<String> getTagsInBurnination() {
 		return repository.findByEndDateNull().map(Burnination::getTag).collect(Collectors.toList());
 	}
-	
+
 	public Map<Integer, String> getBurnRooms() {
 		return repository.findByEndDateNull().collect(Collectors.toMap(Burnination::getRoomId, Burnination::getTag));
 	}
-	
+
 	public List<BurninationQuestion> getDeleteCandidates(String tag) {
 		Burnination burnination = getCurrentBurninationForTag(tag);
-		return burnination.getQuestions().stream().filter(q -> 
-				(q.getScore() <= -2 && 
-				q.getClosedDate() != null && 
-				!q.isManuallyDeleted() && !q.isRoombad() &&
-				DAYS.between(q.getClosedDate(), Instant.now()) >= 2 && 
+		return burnination.getQuestions().stream().filter(q -> q.getDeletedDate() == null && (
+				(q.getScore() <= -2 &&
+				q.getClosedDate() != null &&
+				DAYS.between(q.getClosedDate(), Instant.now()) >= 2 &&
 				q.getAnswerCount() > 0) ||
 				q.getDeleteVoteCount() > 0
-		).collect(Collectors.toList());
+		)).collect(Collectors.toList());
 	}
 
 	private List<BurninationUpdateEvent> populateBurninationQuestion(Question question, BurninationQuestion burninationQuestion, String tag) {
 		List<BurninationUpdateEvent> events = new ArrayList<>();
-		burninationQuestion.setCreatedDate(question.getCreatedDate());
-		
-		burninationQuestion.setClosedDate(question.getClosedDate());
+
 		if (question.getClosedDate() != null) {
-			if (!burninationQuestion.isClosed()) {
+			if (burninationQuestion.getClosedDate() == null) {
 				burninationQuestion.addHistory(new BurninationQuestionHistory(burninationQuestion, "CLOSED", question.getClosedDate()));
-				events.add(new BurninationUpdateEvent(BurninationUpdateEvent.Event.CLOSED, tag, question));
+				events.add(new BurninationUpdateEvent(BurninationUpdateEvent.Event.CLOSED, tag, burninationQuestion));
 			}
-			burninationQuestion.setClosed(true);
 		} else {
-			if (burninationQuestion.isClosed()) {
+			if (burninationQuestion.getClosedDate() != null) {
 				burninationQuestion.addHistory(new BurninationQuestionHistory(burninationQuestion, "REOPENED", Instant.now()));
 			}
-			burninationQuestion.setClosed(false);
 		}
-		
+		burninationQuestion.setClosedDate(question.getClosedDate());
+
 		burninationQuestion.setCloseVoteCount(question.getCloseVoteCount());
 		if (question.getReopenVoteCount() > 0 && burninationQuestion.getReopenVoteCount() == 0) {
-			events.add(new BurninationUpdateEvent(BurninationUpdateEvent.Event.REOPEN_VOTE, tag, question));
+			events.add(new BurninationUpdateEvent(BurninationUpdateEvent.Event.REOPEN_VOTE, tag, burninationQuestion));
 		}
-		
+
 		burninationQuestion.setReopenVoteCount(question.getReopenVoteCount());
 		burninationQuestion.setDeleteVoteCount(question.getDeleteVoteCount());
-		
+
 		if (question.getUndeleteVoteCount() > 0 && burninationQuestion.getUndeleteVoteCount() == 0) {
-			events.add(new BurninationUpdateEvent(BurninationUpdateEvent.Event.UNDELETE_VOTE, tag, question));
+			events.add(new BurninationUpdateEvent(BurninationUpdateEvent.Event.UNDELETE_VOTE, tag, burninationQuestion));
 		}
 		burninationQuestion.setUndeleteVoteCount(question.getUndeleteVoteCount());
-		
-		if (question.hasTag(tag)) {
+
+		if (question.getTags().contains(tag)) {
 			if (burninationQuestion.isRetagged()) {
 				burninationQuestion.addHistory(new BurninationQuestionHistory(burninationQuestion, "RETAGGED WITH", question.getLastEditDate()));
 			}
@@ -179,42 +221,34 @@ public class BurninationService {
 		} else {
 			if (!burninationQuestion.isRetagged()) {
 				burninationQuestion.addHistory(new BurninationQuestionHistory(burninationQuestion, "RETAGGED WITHOUT", question.getLastEditDate()));
-				events.add(new BurninationUpdateEvent(BurninationUpdateEvent.Event.RETAGGED_WITHOUT, tag, question));
+				events.add(new BurninationUpdateEvent(BurninationUpdateEvent.Event.RETAGGED_WITHOUT, tag, burninationQuestion));
 			}
 			burninationQuestion.setRetagged(true);
 		}
-		
-		if (question.getDeletedDate() != null) {
-			if (question.isRoombad()) {
-				if (!burninationQuestion.isRoombad()) {
-					burninationQuestion.addHistory(new BurninationQuestionHistory(burninationQuestion, "ROOMBAD", question.getDeletedDate()));
-					events.add(new BurninationUpdateEvent(BurninationUpdateEvent.Event.DELETED, tag, question));
-				}
-				burninationQuestion.setRoombad(true);
-				burninationQuestion.setManuallyDeleted(false);
-			} else {
-				if (!burninationQuestion.isManuallyDeleted()) {
-					burninationQuestion.addHistory(new BurninationQuestionHistory(burninationQuestion, "MANUALLY DELETED", question.getDeletedDate()));
-					events.add(new BurninationUpdateEvent(BurninationUpdateEvent.Event.DELETED, tag, question));
-				}
-				burninationQuestion.setRoombad(false);
-				burninationQuestion.setManuallyDeleted(true);
-			}
-		} else {
-			if (burninationQuestion.isManuallyDeleted() || burninationQuestion.isRoombad()) {
-				burninationQuestion.addHistory(new BurninationQuestionHistory(burninationQuestion, "UNDELETED", Instant.now()));
-			}
-			burninationQuestion.setManuallyDeleted(false);
-			burninationQuestion.setRoombad(false);
+
+		if (burninationQuestion.getDeletedDate() != null) {
+			burninationQuestion.addHistory(new BurninationQuestionHistory(burninationQuestion, "UNDELETED", Instant.now()));
+			burninationQuestion.setDeletedDate(null);
 		}
-		
-		burninationQuestion.setAcceptedAnswerId(question.getAcceptedAnswerId());
-		burninationQuestion.setAnswerCount(question.getAnswerCount());
-		burninationQuestion.setLink(question.getLink());
-		burninationQuestion.setScore(question.getScore());
+		burninationQuestion.setManuallyDeleted(false);
+		burninationQuestion.setRoombad(false);
+
 		burninationQuestion.setTitle(question.getTitle());
+		burninationQuestion.setLink(question.getLink());
+		burninationQuestion.setShareLink(question.getShareLink());
+		burninationQuestion.setScore(question.getScore());
 		burninationQuestion.setViewCount(question.getViewCount());
-		
+		burninationQuestion.setAnswerCount(question.getAnswerCount());
+		burninationQuestion.setCommentCount(question.getCommentCount());
+		burninationQuestion.setLocked(question.getLockedDate() != null);
+		burninationQuestion.setMigrated(question.isMigrated());
+		burninationQuestion.setAnswered(question.isAnswered());
+		burninationQuestion.setAcceptedAnswerId(question.getAcceptedAnswerId());
+		burninationQuestion.setTags(question.getTags().stream().collect(Collectors.joining(";")));
+		burninationQuestion.setCreatedDate(question.getCreatedDate());
+		burninationQuestion.setClosedAsDuplicate("duplicate".equals(question.getClosedReason()));
+		burninationQuestion.setLastEditDate(question.getLastEditDate());
+
 		return events;
 	}
 

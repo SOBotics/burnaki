@@ -24,25 +24,25 @@ public class Burnination implements Serializable {
 	@GeneratedValue
 	@Column(name = "id", unique = true, nullable = false)
 	private long id;
-	
+
 	@Column(name = "tag", nullable = false, length = 35)
 	private String tag;
-	
+
 	@Column(name = "start_date", nullable = false)
 	private Instant startDate;
-	
+
 	@Column(name = "end_date")
 	private Instant endDate;
-	
+
 	@Column(name = "meta_link", nullable = false)
 	private String metaLink;
-	
+
 	@Column(name = "room_id", nullable = false)
 	private int roomId;
-	
+
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "burnination", cascade = CascadeType.ALL)
 	private List<BurninationProgress> progresses = new ArrayList<>();
-	
+
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "burnination", cascade = CascadeType.ALL)
 	private List<BurninationQuestion> questions = new ArrayList<>();
 
@@ -82,7 +82,7 @@ public class Burnination implements Serializable {
 	public void setMetaLink(String metaLink) {
 		this.metaLink = metaLink;
 	}
-	
+
 	public int getRoomId() {
 		return roomId;
 	}
@@ -103,7 +103,7 @@ public class Burnination implements Serializable {
 	public List<BurninationQuestion> getQuestions() {
 		return questions;
 	}
-	
+
 	public void addQuestion(BurninationQuestion burninationQuestion) {
 		questions.add(burninationQuestion);
 		burninationQuestion.setBurnination(this);

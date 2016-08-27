@@ -14,10 +14,10 @@ public class BurninationProgressId implements Serializable {
 
 	@Column(name = "burnination_id", nullable = false)
 	private long burninationId;
-	
+
 	@Column(name = "progress_date", nullable = false, length = 19)
 	private Instant progressDate;
-	
+
 	public long getBurninationId() {
 		return this.burninationId;
 	}

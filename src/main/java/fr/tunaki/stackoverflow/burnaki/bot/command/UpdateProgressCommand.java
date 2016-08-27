@@ -14,16 +14,16 @@ import fr.tunaki.stackoverflow.chat.Room;
 
 @Component
 public class UpdateProgressCommand implements Command {
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(UpdateProgressCommand.class);
-	
+
 	private BurninationManager burninationManager;
-	
+
 	@Autowired
 	public UpdateProgressCommand(BurninationManager burninationManager) {
 		this.burninationManager = burninationManager;
 	}
-	
+
 	@Override
 	public String getName() {
 		return "update progress";

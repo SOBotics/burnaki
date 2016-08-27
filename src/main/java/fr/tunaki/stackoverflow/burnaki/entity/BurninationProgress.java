@@ -19,35 +19,35 @@ import javax.persistence.Table;
 public class BurninationProgress implements Serializable {
 
 	private static final long serialVersionUID = 8174996252515252416L;
-	
+
 	@EmbeddedId
 	@AttributeOverrides({
 		@AttributeOverride(name = "progressDate", column = @Column(name = "progress_date", nullable = false, length = 19)),
 	})
 	private BurninationProgressId id;
-	
+
 	@MapsId("burninationId")
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "burnination_id", nullable = false)
 	private Burnination burnination;
-	
+
 	@Column(name = "total_questions")
 	private int totalQuestions;
-	
+
 	@Column(name = "closed")
 	private int closed;
-	
+
 	@Column(name = "roombad")
 	private int roombad;
-	
+
 	@Column(name = "manually_deleted")
 	private int manuallyDeleted;
-	
+
 	@Column(name = "retagged")
 	private int retagged;
-	
+
 	public BurninationProgress() { }
-	
+
 	public BurninationProgress(Burnination burnination, Instant progressDate) {
 		id = new BurninationProgressId();
 		id.setBurninationId(burnination.getId());

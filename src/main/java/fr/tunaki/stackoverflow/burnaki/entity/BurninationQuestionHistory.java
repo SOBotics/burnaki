@@ -24,13 +24,13 @@ import javax.persistence.Table;
 public class BurninationQuestionHistory implements Serializable {
 
 	private static final long serialVersionUID = -1978028433062733596L;
-	
+
 	@EmbeddedId
 	@AttributeOverrides({
 		@AttributeOverride(name = "eventDate", column = @Column(name = "event_date", nullable = false, length = 19))
 	})
 	private BurninationQuestionHistoryId id;
-	
+
 	@MapsId("burninationQuestionId")
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumns({
@@ -38,10 +38,10 @@ public class BurninationQuestionHistory implements Serializable {
 		@JoinColumn(name = "question_id", referencedColumnName = "question_id", nullable = false)
 	})
 	private BurninationQuestion burninationQuestion;
-	
+
 	@Column(name = "event_type", nullable = false, length = 45)
 	private String eventType;
-	
+
 	public BurninationQuestionHistory() { }
 
 	public BurninationQuestionHistory(BurninationQuestion burninationQuestion, String eventType, Instant eventDate) {
@@ -62,7 +62,7 @@ public class BurninationQuestionHistory implements Serializable {
 	public void setBurninationQuestion(BurninationQuestion burninationQuestion) {
 		this.burninationQuestion = burninationQuestion;
 	}
-	
+
 	public String getEventType() {
 		return eventType;
 	}

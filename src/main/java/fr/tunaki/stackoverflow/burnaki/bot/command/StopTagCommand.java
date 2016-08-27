@@ -14,11 +14,11 @@ import fr.tunaki.stackoverflow.chat.Room;
 
 @Component
 public class StopTagCommand implements Command {
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(StopTagCommand.class);
-	
+
 	private BurninationManager burninationManager;
-	
+
 	@Autowired
 	public StopTagCommand(BurninationManager burninationManager) {
 		this.burninationManager = burninationManager;

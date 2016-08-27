@@ -31,13 +31,13 @@ import fr.tunaki.stackoverflow.chat.Room;
 
 @Component
 public class DeleteCandidatesCommand implements Command {
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(DeleteCandidatesCommand.class);
-	
+
 	private BurnakiProperties properties;
 	private StackExchangeAPIService apiService;
 	private BurninationManager burninationManager;
-	
+
 	@Autowired
 	public DeleteCandidatesCommand(BurnakiProperties properties, StackExchangeAPIService apiService, BurninationManager burninationManager) {
 		this.properties = properties;
@@ -98,7 +98,7 @@ public class DeleteCandidatesCommand implements Command {
 			return;
 		}
 	}
-	
+
 	private HttpURLConnection getConnection(String url) throws IOException {
 		HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
 		conn.setConnectTimeout(10 * 1000);
@@ -110,7 +110,7 @@ public class DeleteCandidatesCommand implements Command {
 		conn.setRequestProperty("Accept-Encoding", "gzip");
 		return conn;
 	}
-	
+
 	private JsonObject burninationQuestionsToJson(List<BurninationQuestion> bqs, long roomId, String tag) {
 		JsonObject json = new JsonObject();
 		json.addProperty("timestamp", Instant.now().getEpochSecond());

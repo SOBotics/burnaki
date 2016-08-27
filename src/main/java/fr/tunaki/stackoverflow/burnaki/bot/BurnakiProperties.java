@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties("burnaki.bot")
 public class BurnakiProperties {
-	
+
 	private String restApi;
 	private int hqRoomId;
 	private String host;
@@ -32,5 +32,5 @@ public class BurnakiProperties {
 	public void setHost(String host) {
 		this.host = host;
 	}
-	
+
 }

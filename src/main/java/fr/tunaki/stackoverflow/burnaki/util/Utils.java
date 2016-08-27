@@ -7,7 +7,7 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public final class Utils {
-	
+
 	private Utils() { }
 
 	public static <T, A, B> Collector<T, ?, List<B>> unorderedBatchesWith(int batchSize, Collector<T, A, B> batchCollector) {

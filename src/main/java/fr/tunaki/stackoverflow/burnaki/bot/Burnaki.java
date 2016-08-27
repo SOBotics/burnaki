@@ -31,19 +31,19 @@ import fr.tunaki.stackoverflow.chat.event.EventType;
 
 @Component
 public class Burnaki implements Closeable, InitializingBean, BurninationUpdateListener {
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(Burnaki.class);
-	
+
 	private List<Command> commands;
 	private StackExchangeClient client;
 	private StackExchangeAPIService apiService;
 	private BurninationManager burninationManager;
 	private BurnakiProperties properties;
-	
+
 	private BurnRoom hqRoom;
 	private Map<Integer, BurnRoom> burnRooms;
 	private Map<String, Integer> tagsMap;
-	
+
 	@Autowired
 	public Burnaki(List<Command> commands, StackExchangeClient client, StackExchangeAPIService apiService, BurninationManager burninationScheduler, BurnakiProperties properties) {
 		this.commands = commands;
@@ -52,7 +52,7 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 		this.burninationManager = burninationScheduler;
 		this.properties = properties;
 	}
-	
+
 	public void registerEventListeners(Room room) {
 		room.addEventListener(EventType.USER_MENTIONED, event -> {
 			String stripped = event.getMessage().getPlainContent().toLowerCase().replaceAll("\\s*@bur[^\\s$]*\\s*", "").trim();
@@ -107,7 +107,7 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 		else if (tag.startsWith("[")) tag = tag.substring(1, tag.lastIndexOf(']'));
 		return tag;
 	}
-	
+
 	private static String sanitizeChatMessage(String message) {
 		return message.replaceAll("(\\[|\\]|_|\\*|`)", "\\\\$1");
 	}

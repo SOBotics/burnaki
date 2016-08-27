@@ -11,9 +11,9 @@ import javax.persistence.Embeddable;
 public class BurninationQuestionHistoryId implements Serializable {
 
 	private static final long serialVersionUID = -3304636598881447364L;
-	
+
 	private BurninationQuestionId burninationQuestionId;
-	
+
 	@Column(name = "event_date", nullable = false, length = 19)
 	private Instant eventDate;
 

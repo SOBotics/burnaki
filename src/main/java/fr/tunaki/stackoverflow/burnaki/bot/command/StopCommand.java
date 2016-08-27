@@ -14,10 +14,10 @@ import fr.tunaki.stackoverflow.chat.User;
 
 @Component
 public class StopCommand implements Command {
-	
+
 	private BurnakiProperties properties;
 	private ConfigurableApplicationContext context;
-	
+
 	@Autowired
 	public StopCommand(BurnakiProperties properties, ConfigurableApplicationContext context) {
 		this.properties = properties;

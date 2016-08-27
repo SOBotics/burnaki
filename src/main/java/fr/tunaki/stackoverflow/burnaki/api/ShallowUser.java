@@ -1,7 +1,7 @@
 package fr.tunaki.stackoverflow.burnaki.api;
 
 public class ShallowUser {
-	
+
 	private String displayName;
 	private String link;
 
