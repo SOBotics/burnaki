@@ -1,5 +1,8 @@
 package fr.tunaki.stackoverflow.burnaki.bot.command;
 
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.reverseOrder;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -120,6 +123,7 @@ public class DeleteCandidatesCommand implements Command {
 		json.addProperty("is_filtered_duplicates", false);
 		json.addProperty("api_quota", apiService.getQuotaRemaining());
 		JsonArray questions = new JsonArray();
+		bqs.sort(comparing(BurninationQuestion::getDeleteVoteCount, reverseOrder()).thenComparing(BurninationQuestion::getScore));
 		for (BurninationQuestion bq : bqs) {
 			JsonObject jsonBq = new JsonObject();
 			jsonBq.addProperty("link", bq.getLink());
