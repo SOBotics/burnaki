@@ -106,4 +106,8 @@ public class BurninationProgress implements Serializable {
 		this.retagged = retagged;
 	}
 
+	public int getRemaining() {
+		return totalQuestions - closed - retagged - manuallyDeleted - roombad;
+	}
+
 }
