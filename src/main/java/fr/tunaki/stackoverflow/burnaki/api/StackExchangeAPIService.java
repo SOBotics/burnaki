@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.jsoup.Connection.Method;
+import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
 import org.jsoup.parser.Parser;
 import org.slf4j.Logger;
@@ -29,23 +30,23 @@ import fr.tunaki.stackoverflow.burnaki.BurnakiException;
 @Service
 @Transactional
 public class StackExchangeAPIService {
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(StackExchangeAPIService.class);
-	
+
 	private StackExchangeAPIProperties properties;
-	
+
 	private int quota;
-	
+
 	@Autowired
 	public StackExchangeAPIService(StackExchangeAPIProperties properties) {
 		this.properties = properties;
 	}
-	
+
 	public List<Question> getQuestionsInTag(String tag, Instant from) {
 		LOGGER.debug("Retrieving all questions tagged [{}]", tag);
 		return getQuestionsWithTag(tag, from, 1);
 	}
-	
+
 	private List<Question> getQuestionsWithTag(String tag, Instant from, int page) {
 		if (page > properties.getMaxPage()) {
 			throw new BurnakiException("Too many pages for tag [" + tag + "], stopped at page " + page);
@@ -83,9 +84,9 @@ public class StackExchangeAPIService {
 		} catch (IOException e) {
 			throw new BurnakiException("Cannot fetch tags", e);
 		}
-		
+
 	}
-	
+
 	private List<Question> getQuestionsWithIds(String ids, int page) {
 		LOGGER.debug("Retrieving all questions with ids '{}', page {}", ids, page);
 		try {
@@ -104,7 +105,7 @@ public class StackExchangeAPIService {
 	private <T> List<T> toQuestions(JsonObject root, Function<JsonObject, T> mapper) {
 		return StreamSupport.stream(root.get("items").getAsJsonArray().spliterator(), false).map(JsonElement::getAsJsonObject).map(mapper::apply).collect(Collectors.toCollection(ArrayList::new));
 	}
-	
+
 	private void handleBackoff(JsonObject root) {
 		if (root.has("backoff")) {
 			int backoff = root.get("backoff").getAsInt();
@@ -154,7 +155,7 @@ public class StackExchangeAPIService {
 		}
 		return question;
 	}
-	
+
 	private ShallowUser toShallowUser(JsonObject object) {
 		ShallowUser user = new ShallowUser();
 		user.setDisplayName(object.get("display_name").getAsString());
@@ -167,7 +168,11 @@ public class StackExchangeAPIService {
 	}
 
 	private JsonObject get(String method, String... data) throws IOException {
-		String json = Jsoup.connect(properties.getRootUrl() + method).data(data).data("site", properties.getSite(), "key", properties.getKey(), "filter", properties.getFilter(), "pageSize", properties.getPageSize()).method(Method.GET).ignoreContentType(true).execute().body();
+		Response response = Jsoup.connect(properties.getRootUrl() + method).data(data).data("site", properties.getSite(), "key", properties.getKey(), "filter", properties.getFilter(), "pageSize", properties.getPageSize()).method(Method.GET).ignoreContentType(true).ignoreHttpErrors(true).execute();
+		String json = response.body();
+		if (response.statusCode() != 200) {
+			throw new IOException("HTTP " + response.statusCode() + " fetching URL " + (properties.getRootUrl() + method) + ". Body is: " + response.body());
+		}
 		JsonObject root = new JsonParser().parse(json).getAsJsonObject();
 		quota = root.get("quota_remaining").getAsInt();
 		return root;
