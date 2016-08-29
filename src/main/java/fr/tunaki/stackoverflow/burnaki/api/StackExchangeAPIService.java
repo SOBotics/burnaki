@@ -123,7 +123,7 @@ public class StackExchangeAPIService {
 		question.setId(object.get("question_id").getAsInt());
 		question.setLink(object.get("link").getAsString());
 		question.setShareLink(object.get("share_link").getAsString());
-		question.setTitle(Parser.unescapeEntities(object.get("title").getAsString(), false));
+		question.setTitle(Parser.unescapeEntities(object.get("title").getAsString(), false).trim());
 		question.setTags(StreamSupport.stream(object.get("tags").getAsJsonArray().spliterator(), false).map(JsonElement::getAsString).collect(Collectors.toList()));
 		question.setCloseVoteCount(object.get("close_vote_count").getAsInt());
 		question.setReopenVoteCount(object.get("reopen_vote_count").getAsInt());
