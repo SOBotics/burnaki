@@ -97,7 +97,7 @@ public class BurninationManager implements Closeable, InitializingBean {
 		return burninationService.getDeleteCandidates(tag);
 	}
 
-	public Map<Integer, String> getBurnRooms() {
+	public Map<Integer, List<String>> getBurnRooms() {
 		return burninationService.getBurnRooms();
 	}
 

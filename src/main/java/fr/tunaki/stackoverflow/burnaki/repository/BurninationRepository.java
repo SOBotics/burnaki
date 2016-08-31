@@ -17,13 +17,6 @@ public interface BurninationRepository extends CrudRepository<Burnination, Long>
 	Optional<Burnination> findByTagAndEndDateNull(String tag);
 
 	/**
-	 * Returns the on-going burnination for the given room, as an <code>Optional</code>.
-	 * @param roomId Room ID.
-	 * @return The on-going burnination for the given room, as an <code>Optional</code>.
-	 */
-	Optional<Burnination> findByRoomIdAndEndDateNull(int roomId);
-
-	/**
 	 * Returns the list of on-going burninations.
 	 * @return The list of on-going burninations.
 	 */

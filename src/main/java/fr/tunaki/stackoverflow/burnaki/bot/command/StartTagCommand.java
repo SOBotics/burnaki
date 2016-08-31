@@ -64,6 +64,10 @@ public class StartTagCommand implements Command {
 		String metaLink = arguments[2];
 		try {
 			roomId = Integer.parseInt(arguments[1]);
+			if (roomId == properties.getHqRoomId()) {
+				room.replyTo(messageId , "Cannot start burnination in HQ room");
+				return;
+			}
 		} catch (NumberFormatException e) {
 			room.replyTo(messageId , "Cannot start burnination; incorrect value for roomId: " + arguments[1]);
 			return;
@@ -76,9 +80,8 @@ public class StartTagCommand implements Command {
 			room.replyTo(messageId, "Cannot start burnination of tag \\[" + tag + "\\]: " + e.getMessage());
 		}
 		if (roomId != properties.getHqRoomId()) {
-			BurnRoom burnRoom = new BurnRoom(client.joinRoom(properties.getHost(), roomId), tag);
-			burnaki.getBurnRooms().put(roomId, burnRoom);
-			burnaki.registerEventListeners(burnRoom.getRoom());
+			BurnRoom br = burnaki.getBurnRooms().computeIfAbsent(roomId, r -> new BurnRoom(client.joinRoom(properties.getHost(), r), tag));
+			burnaki.registerEventListeners(br.getRoom());
 		}
 	}
 

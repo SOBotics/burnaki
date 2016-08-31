@@ -8,6 +8,7 @@ import static java.util.stream.Collectors.toMap;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -73,9 +74,9 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 				wasCommandMatched = true;
 				String[] arguments = plainContent.substring(command.getName().length()).trim().split(" ");
 				arguments = Arrays.stream(arguments).filter(s -> !s.isEmpty()).toArray(String[]::new);
-				if (burnRooms.containsKey(roomId)) {
+				if (burnRooms.containsKey(roomId) && room.getTags().size() == 1) {
 					if (arguments.length == command.argumentCount() - 1) {
-						arguments = Stream.concat(Stream.of(room.getTag()), Arrays.stream(arguments)).toArray(String[]::new);
+						arguments = Stream.concat(Stream.of(room.getTags().get(0)), Arrays.stream(arguments)).toArray(String[]::new);
 					} else if (arguments.length < command.argumentCount()) {
 						room.getRoom().send("Not enough arguments for command `" + command.getName() + "`. Usage is: `" + command.getUsage() + "`.");
 						return;
@@ -123,10 +124,10 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		hqRoom = new BurnRoom(client.joinRoom(properties.getHost(), properties.getHqRoomId()), null);
-		Map<Integer, String> idToTag = burninationManager.getBurnRooms();
-		burnRooms = idToTag.entrySet().stream().filter(e -> e.getKey() != properties.getHqRoomId()).collect(toMap(Map.Entry::getKey, e -> new BurnRoom(client.joinRoom(properties.getHost(), e.getKey()), e.getValue())));
-		tagsMap = idToTag.entrySet().stream().collect(toMap(Map.Entry::getValue, Map.Entry::getKey));
+		hqRoom = new BurnRoom(client.joinRoom(properties.getHost(), properties.getHqRoomId()));
+		Map<Integer, List<String>> idToTags = burninationManager.getBurnRooms();
+		burnRooms = idToTags.entrySet().stream().collect(toMap(Map.Entry::getKey, e -> new BurnRoom(client.joinRoom(properties.getHost(), e.getKey()), e.getValue())));
+		tagsMap = idToTags.entrySet().stream().flatMap(e -> e.getValue().stream().map(t -> new AbstractMap.SimpleEntry<>(e.getKey(), t))).collect(toMap(Map.Entry::getValue, Map.Entry::getKey));
 		registerEventListeners(hqRoom.getRoom());
 		hqRoom.getRoom().send("Hiya o/");
 		burnRooms.forEach((k, v) -> {

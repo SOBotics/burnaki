@@ -2,6 +2,12 @@ package fr.tunaki.stackoverflow.burnaki.service;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -12,7 +18,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,9 +56,6 @@ public class BurninationService {
 		if (repository.findByTagAndEndDateNull(tag).isPresent()) {
 			throw new BurnakiException("A burnination of " + tag + " is already on-going.");
 		}
-		if (repository.findByRoomIdAndEndDateNull(roomId).isPresent()) {
-			throw new BurnakiException("A burnination is already under taken by room " + roomId + ". One room can only handle one burnination.");
-		}
 		Burnination burnination = new Burnination();
 		burnination.setTag(tag);
 		burnination.setStartDate(Instant.now());
@@ -73,12 +75,12 @@ public class BurninationService {
 		Burnination burnination = getCurrentBurninationForTag(tag);
 		LOGGER.debug("Updating the burnination of tag [{}]", tag);
 		List<BurninationUpdateEvent> events = new ArrayList<>();
-		Map<Integer, BurninationQuestion> presentMap = burnination.getQuestions().stream().collect(Collectors.toMap(bq -> bq.getId().getQuestionId(), Function.identity()));
+		Map<Integer, BurninationQuestion> presentMap = burnination.getQuestions().stream().collect(toMap(bq -> bq.getId().getQuestionId(), Function.identity()));
 		Set<Integer> keySet = presentMap.keySet();
 		List<Question> results = apiService.getQuestionsWithIds(keySet);
 
 		// identify deleted questions not returned by API (those for which the ID was given but nothing was returned)
-		Set<Integer> returnedIds = results.stream().map(t -> t.getId()).collect(Collectors.toSet());
+		Set<Integer> returnedIds = results.stream().map(t -> t.getId()).collect(toSet());
 		Map<Integer, BurninationQuestion> deltas = new HashMap<>(presentMap);
 		deltas.keySet().removeAll(returnedIds);
 		for (BurninationQuestion bq : deltas.values()) {
@@ -106,7 +108,7 @@ public class BurninationService {
 
 		// add to burn list new questions posted in burn tag since last refresh (minus 5 minutes to account for the delay of doing all this work)
 		Instant from = burnination.getLastRefreshDate() == null ? null : burnination.getLastRefreshDate().minus(5, ChronoUnit.MINUTES);
-		for (Question question : apiService.getQuestionsInTag(tag, from).stream().filter(q -> !presentMap.containsKey(q.getId())).collect(Collectors.toList())) {
+		for (Question question : apiService.getQuestionsInTag(tag, from).stream().filter(q -> !presentMap.containsKey(q.getId())).collect(toList())) {
 			LOGGER.debug("New question with id {} asked in tag under burnination [{}]", question.getId(), tag);
 			BurninationQuestion burninationQuestion = new BurninationQuestion(burnination, question.getId());
 			burnination.addQuestion(burninationQuestion);
@@ -159,7 +161,7 @@ public class BurninationService {
 	}
 
 	public List<BurninationProgress> getProgress(String tag) {
-		return getCurrentBurninationForTag(tag).getProgresses().stream().sorted(comparing(e -> e.getId().getProgressDate())).collect(Collectors.toList());
+		return getCurrentBurninationForTag(tag).getProgresses().stream().sorted(comparing(e -> e.getId().getProgressDate())).collect(toList());
 	}
 
 	public void stop(String tag) {
@@ -170,11 +172,11 @@ public class BurninationService {
 	}
 
 	public List<String> getTagsInBurnination() {
-		return repository.findByEndDateNull().map(Burnination::getTag).collect(Collectors.toList());
+		return repository.findByEndDateNull().map(Burnination::getTag).collect(toList());
 	}
 
-	public Map<Integer, String> getBurnRooms() {
-		return repository.findByEndDateNull().collect(Collectors.toMap(Burnination::getRoomId, Burnination::getTag));
+	public Map<Integer, List<String>> getBurnRooms() {
+		return repository.findByEndDateNull().collect(groupingBy(Burnination::getRoomId, mapping(Burnination::getTag, toList())));
 	}
 
 	public List<BurninationQuestion> getDeleteCandidates(String tag) {
@@ -185,7 +187,7 @@ public class BurninationService {
 				DAYS.between(q.getClosedDate(), Instant.now()) >= 2 &&
 				q.getAnswerCount() > 0) ||
 				q.getDeleteVoteCount() > 0
-		)).collect(Collectors.toList());
+		)).collect(toList());
 	}
 
 	private List<BurninationUpdateEvent> populateBurninationQuestion(Question question, BurninationQuestion burninationQuestion, String tag) {
@@ -244,7 +246,7 @@ public class BurninationService {
 		burninationQuestion.setMigrated(question.isMigrated());
 		burninationQuestion.setAnswered(question.isAnswered());
 		burninationQuestion.setAcceptedAnswerId(question.getAcceptedAnswerId());
-		burninationQuestion.setTags(question.getTags().stream().collect(Collectors.joining(";")));
+		burninationQuestion.setTags(question.getTags().stream().collect(joining(";")));
 		burninationQuestion.setCreatedDate(question.getCreatedDate());
 		burninationQuestion.setClosedAsDuplicate("duplicate".equals(question.getClosedReason()));
 		burninationQuestion.setLastEditDate(question.getLastEditDate());
