@@ -70,7 +70,7 @@ public class StartTagCommand implements Command {
 		}
 		try {
 			int size = burninationManager.start(tag, roomId, metaLink);
-			room.replyTo(messageId, "Burnination of tag \\[" + tag + "\\] correctly started! Have fun, " + size + " questions to go!");
+			room.replyTo(messageId, "Burnination of tag \\[" + tag + "\\] correctly started! Have fun, " + size + " question" + (size == 1 ? "" : "s") + " to go!");
 		} catch (Exception e) {
 			LOGGER.error("Cannot start burnination of tag [{}]", tag, e);
 			room.replyTo(messageId, "Cannot start burnination of tag \\[" + tag + "\\]: " + e.getMessage());
