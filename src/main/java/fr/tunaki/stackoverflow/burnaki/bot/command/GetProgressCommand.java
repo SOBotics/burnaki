@@ -81,7 +81,7 @@ public class GetProgressCommand implements Command {
 			return;
 		}
 		BurninationProgress latest = progresses.get(progresses.size() - 1);
-		room.send("Here's a recap of the efforts so far for \\[" + tag + "\\]: Total questions (" + latest.getTotalQuestions() + "), Retagged (" + latest.getRetagged() + "), Closed (" + latest.getClosed() + "), Roombad (" + latest.getRoombad() + "), Manually deleted (" + latest.getManuallyDeleted() + ").");
+		room.send("Here's a recap of the efforts so far for \\[" + tag + "\\]: Total questions (" + latest.getTotalQuestions() + "), Remaining (" + latest.getOpenedWithTag() + "), Retagged (" + latest.getRetagged() + "), Closed (" + latest.getClosed() + "), Roombad (" + latest.getRoombad() + "), Manually deleted (" + latest.getManuallyDeleted() + ").");
 
 		room.send("Here are some nice images...");
 		List<Date> x = new ArrayList<>();
