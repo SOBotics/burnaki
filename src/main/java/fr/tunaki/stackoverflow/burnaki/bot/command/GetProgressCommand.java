@@ -95,7 +95,7 @@ public class GetProgressCommand implements Command {
 				+ "Retagged (" + latest.getRetagged() + "), "
 				+ "Closed (" + latest.getClosed() + "), "
 				+ "Roombad (" + latest.getRoombad() + "), "
-				+ "Manually deleted (" + latest.getManuallyDeleted() + ")."
+				+ "Manually deleted (" + latest.getManuallyDeleted() + "). "
 				+ "The effort has been going on for " + daysCount + " day" + (daysCount == 1 ? "" : "s") + ".");
 
 		List<Date> x = new ArrayList<>();
