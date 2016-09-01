@@ -58,7 +58,6 @@ public class StopCommand implements Command {
 		}
 		int roomId = (int) room.getRoomId();
 		if (roomId == properties.getHqRoomId()) {
-			burnaki.getBurnRooms().forEach((id, r) -> r.getRoom().send("I'm stopping, see you guys later!"));
 			room.send("Bye.").thenRun(context::close);
 		} else {
 			room.send("Okay, I'm leaving this room.").thenRun(room::leave).thenRun(() -> burnaki.getBurnRooms().remove(roomId));
