@@ -160,8 +160,10 @@ public class BurninationService {
 		repository.save(burnination);
 	}
 
-	public List<BurninationProgress> getProgress(String tag) {
-		return getCurrentBurninationForTag(tag).getProgresses().stream().sorted(comparing(e -> e.getId().getProgressDate())).collect(toList());
+	public Burnination getBurninationWithProgress(String tag) {
+		Burnination burnination = getCurrentBurninationForTag(tag);
+		burnination.getProgresses().sort(comparing(e -> e.getId().getProgressDate()));
+		return burnination;
 	}
 
 	public void stop(String tag) {

@@ -1,11 +1,15 @@
 package fr.tunaki.stackoverflow.burnaki.bot.command;
 
+import static java.time.temporal.ChronoUnit.DAYS;
+
 import java.awt.Color;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -24,6 +28,7 @@ import org.springframework.stereotype.Component;
 
 import fr.tunaki.stackoverflow.burnaki.BurninationManager;
 import fr.tunaki.stackoverflow.burnaki.bot.Burnaki;
+import fr.tunaki.stackoverflow.burnaki.entity.Burnination;
 import fr.tunaki.stackoverflow.burnaki.entity.BurninationProgress;
 import fr.tunaki.stackoverflow.chat.Message;
 import fr.tunaki.stackoverflow.chat.Room;
@@ -67,21 +72,31 @@ public class GetProgressCommand implements Command {
 
 	@Override
 	public void execute(Message message, Room room, Burnaki burnaki, String[] arguments) {
-		String tag = arguments[0];
-		List<BurninationProgress> progresses;
+		String tag = arguments[0], openedURL;
+		Burnination burnination;
 		try {
-			progresses = burninationManager.getProgress(tag);
+			burnination = burninationManager.getBurninationWithProgress(tag);
+			openedURL = "//stackoverflow.com/search?q=" + URLEncoder.encode("[" + tag + "] is:q closed:no", "UTF-8");
 		} catch (Exception e) {
 			LOGGER.error("Cannot get progress of burnination for tag [{}]", tag, e);
 			room.replyTo(message.getId(), "Cannot get progress of burnination for tag \\[" + tag + "\\]: " + e.getMessage());
 			return;
 		}
+		List<BurninationProgress> progresses = burnination.getProgresses();
 		if (progresses.isEmpty()) {
 			room.replyTo(message.getId(), "No registered progress for \\[" + tag + "\\] yet. You need to work some more!");
 			return;
 		}
 		BurninationProgress latest = progresses.get(progresses.size() - 1);
-		room.send("Here's a recap of the efforts so far for \\[" + tag + "\\]: Total questions (" + latest.getTotalQuestions() + "), Remaining (" + latest.getOpenedWithTag() + "), Retagged (" + latest.getRetagged() + "), Closed (" + latest.getClosed() + "), Roombad (" + latest.getRoombad() + "), Manually deleted (" + latest.getManuallyDeleted() + ").");
+		long daysCount = DAYS.between(burnination.getStartDate(), Instant.now());
+		room.send("Here's a recap of the efforts so far for [\\[" + tag + "\\]](" + burnination.getMetaLink() + "): "
+				+ "Total questions (" + latest.getTotalQuestions() + "), "
+				+ "[Remaining](" + openedURL + ") (" + latest.getOpenedWithTag() + "), "
+				+ "Retagged (" + latest.getRetagged() + "), "
+				+ "Closed (" + latest.getClosed() + "), "
+				+ "Roombad (" + latest.getRoombad() + "), "
+				+ "Manually deleted (" + latest.getManuallyDeleted() + ")."
+				+ "The effort has been going on for " + daysCount + " day" + (daysCount == 1 ? "" : "s") + ".");
 
 		List<Date> x = new ArrayList<>();
 		List<Integer> yClosed = new ArrayList<>(), yRemaining = new ArrayList<>(), yRetagged = new ArrayList<>(), yDeleted = new ArrayList<>(), yRoombad = new ArrayList<>();

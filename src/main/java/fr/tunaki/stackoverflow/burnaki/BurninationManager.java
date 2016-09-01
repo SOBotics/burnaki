@@ -19,7 +19,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import fr.tunaki.stackoverflow.burnaki.entity.BurninationProgress;
+import fr.tunaki.stackoverflow.burnaki.entity.Burnination;
 import fr.tunaki.stackoverflow.burnaki.entity.BurninationQuestion;
 import fr.tunaki.stackoverflow.burnaki.service.BurninationService;
 import fr.tunaki.stackoverflow.burnaki.service.BurninationUpdateEvent;
@@ -89,8 +89,8 @@ public class BurninationManager implements Closeable, InitializingBean {
 		burninationService.updateProgress(tag);
 	}
 
-	public List<BurninationProgress> getProgress(String tag) {
-		return burninationService.getProgress(tag);
+	public Burnination getBurninationWithProgress(String tag) {
+		return burninationService.getBurninationWithProgress(tag);
 	}
 
 	public List<BurninationQuestion> getDeleteCandidates(String tag) {
