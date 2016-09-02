@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS `burnaki`.`burnination_question_history` (
   `question_id` INT(11) NOT NULL,
   `event_date` DATETIME NOT NULL,
   `event_type` VARCHAR(45) CHARACTER SET 'utf8' NOT NULL,
-  PRIMARY KEY (`burnination_id`, `question_id`, `event_date`),
+  PRIMARY KEY (`burnination_id`, `question_id`, `event_date`, `event_type`),
   CONSTRAINT `fk_burnination_question_history_burnination`
     FOREIGN KEY (`burnination_id` , `question_id`)
     REFERENCES `burnaki`.`burnination_question` (`burnination_id` , `question_id`)
