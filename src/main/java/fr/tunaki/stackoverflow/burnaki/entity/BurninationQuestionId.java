@@ -50,4 +50,9 @@ public class BurninationQuestionId implements Serializable {
 		return Objects.hash(burninationId, questionId);
 	}
 
+	@Override
+	public String toString() {
+		return "[burninationId=" + burninationId + ";questionId=" + questionId + "]";
+	}
+
 }

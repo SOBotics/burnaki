@@ -51,4 +51,9 @@ public class BurninationProgressId implements Serializable {
 		return Objects.hash(burninationId, progressDate);
 	}
 
+	@Override
+	public String toString() {
+		return "[burninationId=" + burninationId + ";progressDate=" + progressDate + "]";
+	}
+
 }
