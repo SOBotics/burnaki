@@ -27,7 +27,8 @@ public class BurninationQuestionHistory implements Serializable {
 
 	@EmbeddedId
 	@AttributeOverrides({
-		@AttributeOverride(name = "eventDate", column = @Column(name = "event_date", nullable = false, length = 19))
+		@AttributeOverride(name = "eventDate", column = @Column(name = "event_date", nullable = false, length = 19)),
+		@AttributeOverride(name = "eventType", column = @Column(name = "event_type", nullable = false, length = 45))
 	})
 	private BurninationQuestionHistoryId id;
 
@@ -39,16 +40,13 @@ public class BurninationQuestionHistory implements Serializable {
 	})
 	private BurninationQuestion burninationQuestion;
 
-	@Column(name = "event_type", nullable = false, length = 45)
-	private String eventType;
-
 	public BurninationQuestionHistory() { }
 
 	public BurninationQuestionHistory(BurninationQuestion burninationQuestion, String eventType, Instant eventDate) {
 		id = new BurninationQuestionHistoryId();
 		id.setBurninationQuestionId(burninationQuestion.getId());
 		id.setEventDate(eventDate);
-		this.eventType = eventType;
+		id.setEventType(eventType);
 	}
 
 	public BurninationQuestionHistoryId getId() {
@@ -61,14 +59,6 @@ public class BurninationQuestionHistory implements Serializable {
 
 	public void setBurninationQuestion(BurninationQuestion burninationQuestion) {
 		this.burninationQuestion = burninationQuestion;
-	}
-
-	public String getEventType() {
-		return eventType;
-	}
-
-	public void setEventType(String eventType) {
-		this.eventType = eventType;
 	}
 
 }
