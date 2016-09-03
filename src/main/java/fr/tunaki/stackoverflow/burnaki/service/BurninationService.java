@@ -149,7 +149,7 @@ public class BurninationService {
 			if (question.isManuallyDeleted()) manuallyDeleted++;
 			if (question.isRetagged()) retagged++;
 			if (question.isRoombad()) roombad++;
-			if (question.getClosedDate() == null && !question.isRetagged()) openedWithTag++;
+			if (question.getDeletedDate() == null && question.getClosedDate() == null && !question.isRetagged()) openedWithTag++;
 		}
 		burninationProgress.setClosed(closed);
 		burninationProgress.setManuallyDeleted(manuallyDeleted);
