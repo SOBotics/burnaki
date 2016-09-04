@@ -11,6 +11,7 @@ import fr.tunaki.stackoverflow.burnaki.BurninationManager;
 import fr.tunaki.stackoverflow.burnaki.bot.Burnaki;
 import fr.tunaki.stackoverflow.chat.Message;
 import fr.tunaki.stackoverflow.chat.Room;
+import fr.tunaki.stackoverflow.chat.User;
 
 @Component
 public class StopTagCommand implements Command {
@@ -53,6 +54,11 @@ public class StopTagCommand implements Command {
 	public void execute(Message message, Room room, Burnaki burnaki, String[] arguments) {
 		String tag = arguments[0];
 		long messageId = message.getId();
+		User user = message.getUser();
+		if (!user.isModerator() && !user.isRoomOwner()) {
+			room.send("Nope. Only a moderator or a room owner can stop the burnination.");
+			return;
+		}
 		try {
 			burninationManager.stop(tag);
 			room.replyTo(messageId, "Burnination of tag \\[" + tag + "\\] correctly stopped! I hope you had real fun!");

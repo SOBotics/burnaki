@@ -14,6 +14,7 @@ import fr.tunaki.stackoverflow.burnaki.bot.BurnakiProperties;
 import fr.tunaki.stackoverflow.chat.Message;
 import fr.tunaki.stackoverflow.chat.Room;
 import fr.tunaki.stackoverflow.chat.StackExchangeClient;
+import fr.tunaki.stackoverflow.chat.User;
 
 @Component
 public class StartTagCommand implements Command {
@@ -62,6 +63,11 @@ public class StartTagCommand implements Command {
 		long messageId = message.getId();
 		String tag = arguments[0];
 		String metaLink = arguments[2];
+		User user = message.getUser();
+		if (!user.isModerator() && !user.isRoomOwner()) {
+			room.send("Nope. Only a moderator or a room owner can start burnination of new tags.");
+			return;
+		}
 		try {
 			roomId = Integer.parseInt(arguments[1]);
 			if (roomId == properties.getHqRoomId()) {
