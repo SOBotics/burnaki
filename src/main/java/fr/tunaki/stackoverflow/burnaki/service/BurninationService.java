@@ -86,7 +86,7 @@ public class BurninationService {
 		for (BurninationQuestion bq : deltas.values()) {
 			if (bq.getDeletedDate() == null) {
 				bq.setDeletedDate(Instant.now());
-				if (wasProbablyRoombad(bq)) {
+				if (bq.wasProbablyRoombad()) {
 					bq.addHistory(new BurninationQuestionHistory(bq, "ROOMBAD", bq.getDeletedDate()));
 					events.add(new BurninationUpdateEvent(BurninationUpdateEvent.Event.DELETED, tag, bq));
 					bq.setRoombad(true);
@@ -119,24 +119,6 @@ public class BurninationService {
 		burnination.setLastRefreshDate(Instant.now());
 		repository.save(burnination);
 		return events;
-	}
-
-	private boolean wasProbablyRoombad(BurninationQuestion bq) {
-		long age = DAYS.between(bq.getCreatedDate(), Instant.now());
-		return /* RemoveDeadQuestions */
-				(age >= 30 && bq.getScore() <= -1 && bq.getAnswerCount() == 0 && !bq.isLocked()) ||
-			   /* RemoveMigrationStubs */
-				(age >= 30 && bq.isMigrated()) ||
-			   /* RemoveAbandonedQuestions */
-				(age >= 365 && bq.getScore() == 0 && bq.getAnswerCount() == 0 && !bq.isLocked() &&
-				 bq.getViewCount() <= 1.5 * age && bq.getCommentCount() <= 1
-				) ||
-			   /* RemoveAbandonedClosed */
-				(bq.getClosedDate() != null && DAYS.between(bq.getClosedDate(), Instant.now()) >= 9 &&
-				 !bq.isClosedAsDuplicate() && bq.getScore() <= 0 && !bq.isLocked() && !bq.isAnswered() &&
-				 bq.getAcceptedAnswerId() == null && bq.getReopenVoteCount() == 0 &&
-				 (bq.getLastEditDate() == null || DAYS.between(bq.getLastEditDate(), Instant.now()) >= 9)
-				);
 	}
 
 	public void updateProgress(String tag) {

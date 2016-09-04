@@ -1,7 +1,12 @@
 package fr.tunaki.stackoverflow.burnaki.entity;
 
+import static java.time.temporal.ChronoUnit.DAYS;
+
 import java.io.Serializable;
+import java.time.DayOfWeek;
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -329,6 +334,38 @@ public class BurninationQuestion implements Serializable {
 
 	public void setLastEditDate(Instant lastEditDate) {
 		this.lastEditDate = lastEditDate;
+	}
+
+	public boolean wasProbablyRoombad() {
+		return daysBeforeRoomba() <= 0;
+	}
+
+	public long daysBeforeRoomba() {
+		Instant now = Instant.now();
+		long result = Long.MAX_VALUE;
+		/* RemoveDeadQuestions and RemoveMigrationStubs */
+		if (score <= -1 && answerCount == 0 && !locked || migrated) {
+			int delta = 30;
+			long daysBeforeRoomba = DAYS.between(now, toNextUTCSaturday(createdDate.plus(delta, DAYS))) + 1;
+			result = Math.min(result, daysBeforeRoomba);
+		}
+		/* RemoveAbandonedQuestions */
+		if (score == 0 && answerCount == 0 && !locked && commentCount <= 1) {
+			int delta = Math.max(365, (int) (viewCount / 1.5) + 1);
+			long daysBeforeRoomba = DAYS.between(now, toNextUTCSaturday(createdDate.plus(delta, DAYS))) + 1;
+			result = Math.min(result, daysBeforeRoomba);
+		}
+		/* RemoveAbandonedClosed */
+		if (closedDate != null && !closedAsDuplicate && score <= 0 && !locked && !answered && acceptedAnswerId == null && reopenVoteCount == 0) {
+			Instant date = lastEditDate == null || closedDate.isAfter(lastEditDate) ? closedDate : lastEditDate;
+			long daysBeforeRoomba = DAYS.between(now, date.plus(9, DAYS)) + 1;
+			result = Math.min(result, daysBeforeRoomba);
+		}
+		return result;
+	}
+
+	private static Instant toNextUTCSaturday(Instant instant) {
+		return instant.atZone(ZoneOffset.UTC).with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY)).toInstant();
 	}
 
 }
