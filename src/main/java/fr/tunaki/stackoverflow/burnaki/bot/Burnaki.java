@@ -25,6 +25,7 @@ import fr.tunaki.stackoverflow.burnaki.api.StackExchangeAPIService;
 import fr.tunaki.stackoverflow.burnaki.bot.command.Command;
 import fr.tunaki.stackoverflow.burnaki.service.BurninationUpdateEvent;
 import fr.tunaki.stackoverflow.burnaki.service.BurninationUpdateListener;
+import fr.tunaki.stackoverflow.chat.ChatHost;
 import fr.tunaki.stackoverflow.chat.Message;
 import fr.tunaki.stackoverflow.chat.Room;
 import fr.tunaki.stackoverflow.chat.StackExchangeClient;
@@ -126,9 +127,10 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		hqRoom = new BurnRoom(client.joinRoom(properties.getHost(), properties.getHqRoomId()));
+		ChatHost chatHost = ChatHost.valueOf(properties.getHost());
+		hqRoom = new BurnRoom(client.joinRoom(chatHost, properties.getHqRoomId()));
 		Map<Integer, List<String>> idToTags = burninationManager.getBurnRooms();
-		burnRooms = idToTags.entrySet().stream().collect(toMap(Map.Entry::getKey, e -> new BurnRoom(client.joinRoom(properties.getHost(), e.getKey()), e.getValue())));
+		burnRooms = idToTags.entrySet().stream().collect(toMap(Map.Entry::getKey, e -> new BurnRoom(client.joinRoom(chatHost, e.getKey()), e.getValue())));
 		tagsMap = idToTags.entrySet().stream().flatMap(e -> e.getValue().stream().map(t -> new AbstractMap.SimpleEntry<>(e.getKey(), t))).collect(toMap(Map.Entry::getValue, Map.Entry::getKey));
 		registerEventListeners(hqRoom.getRoom());
 		hqRoom.getRoom().send("Hiya o/");

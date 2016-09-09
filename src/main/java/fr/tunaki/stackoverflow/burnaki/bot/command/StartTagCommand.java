@@ -11,6 +11,7 @@ import fr.tunaki.stackoverflow.burnaki.BurninationManager;
 import fr.tunaki.stackoverflow.burnaki.bot.BurnRoom;
 import fr.tunaki.stackoverflow.burnaki.bot.Burnaki;
 import fr.tunaki.stackoverflow.burnaki.bot.BurnakiProperties;
+import fr.tunaki.stackoverflow.chat.ChatHost;
 import fr.tunaki.stackoverflow.chat.Message;
 import fr.tunaki.stackoverflow.chat.Room;
 import fr.tunaki.stackoverflow.chat.StackExchangeClient;
@@ -86,7 +87,7 @@ public class StartTagCommand implements Command {
 			room.replyTo(messageId, "Cannot start burnination of tag \\[" + tag + "\\]: " + e.getMessage());
 		}
 		if (roomId != properties.getHqRoomId()) {
-			BurnRoom br = burnaki.getBurnRooms().computeIfAbsent(roomId, r -> new BurnRoom(client.joinRoom(properties.getHost(), r), tag));
+			BurnRoom br = burnaki.getBurnRooms().computeIfAbsent(roomId, r -> new BurnRoom(client.joinRoom(ChatHost.valueOf(properties.getHost()), r), tag));
 			burnaki.registerEventListeners(br.getRoom());
 		}
 	}
