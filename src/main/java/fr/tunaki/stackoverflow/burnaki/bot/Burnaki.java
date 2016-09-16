@@ -120,7 +120,7 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 			String tag = events.get(0).getTag();
 			BurnRoom burnRoom = burnRooms.getOrDefault(tagsMap.get(tag), hqRoom);
 			boolean singleTag = burnRoom.getTags().size() == 1;
-			List<String> messages = events.stream().collect(groupingBy(BurninationUpdateEvent::getEvent, mapping(e -> "[" + sanitizeChatMessage(e.getQuestion().getTitle()) + "](" + e.getQuestion().getShareLink() + ")", joining(", ", ": ", ".")))).entrySet().stream().map(e -> (singleTag ? "" : "\\[" + tag + "\\] ") + e.getKey().getDisplay() + e.getValue()).collect(toList());
+			List<String> messages = events.stream().collect(groupingBy(BurninationUpdateEvent::getEvent, mapping(e -> "[" + sanitizeChatMessage(e.getQuestion().getTitle()) + "](" + e.getQuestion().getShareLink() + ")", joining(", ", ": ", ".")))).entrySet().stream().map(e -> "\\[ [Burnaki](//stackapps.com/q/7027) \\] " + (singleTag ? "" : "\\[" + tag + "\\] ") + e.getKey().getDisplay() + e.getValue()).collect(toList());
 			messages.forEach(burnRoom.getRoom()::send);
 		}
 	}
