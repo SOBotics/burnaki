@@ -200,12 +200,12 @@ public class BurninationService {
 
 		if (question.getTags().contains(tag)) {
 			if (burninationQuestion.isRetagged()) {
-				burninationQuestion.addHistory(new BurninationQuestionHistory(burninationQuestion, "RETAGGED WITH", question.getLastEditDate()));
+				burninationQuestion.addHistory(new BurninationQuestionHistory(burninationQuestion, "RETAGGED WITH", question.getLastEditDate() == null ? Instant.now() : question.getLastEditDate()));
 			}
 			burninationQuestion.setRetagged(false);
 		} else {
 			if (!burninationQuestion.isRetagged()) {
-				burninationQuestion.addHistory(new BurninationQuestionHistory(burninationQuestion, "RETAGGED WITHOUT", question.getLastEditDate()));
+				burninationQuestion.addHistory(new BurninationQuestionHistory(burninationQuestion, "RETAGGED WITHOUT", question.getLastEditDate() == null ? Instant.now() : question.getLastEditDate()));
 				events.add(new BurninationUpdateEvent(BurninationUpdateEvent.Event.RETAGGED_WITHOUT, tag, burninationQuestion));
 			}
 			burninationQuestion.setRetagged(true);
