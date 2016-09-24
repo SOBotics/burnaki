@@ -134,6 +134,8 @@ public class DeleteCandidatesCommand implements Command {
 			jsonBq.addProperty("answer_count", bq.getAnswerCount());
 			jsonBq.addProperty("accepted_answer_id", bq.getAcceptedAnswerId() == null ? 0 : bq.getAcceptedAnswerId());
 			jsonBq.addProperty("close_vote_count", bq.getCloseVoteCount());
+			jsonBq.addProperty("delete_vote_count", bq.getDeleteVoteCount());
+			bq.daysBeforeRoomba().ifPresent(d -> jsonBq.addProperty("days_before_roomba", d));
 			questions.add(jsonBq);
 		}
 		json.add("questions", questions);

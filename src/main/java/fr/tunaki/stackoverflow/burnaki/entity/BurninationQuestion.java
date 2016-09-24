@@ -9,6 +9,7 @@ import java.time.ZoneOffset;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.OptionalLong;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
@@ -337,10 +338,10 @@ public class BurninationQuestion implements Serializable {
 	}
 
 	public boolean wasProbablyRoombad() {
-		return daysBeforeRoomba() <= 0;
+		return daysBeforeRoomba().orElse(Long.MAX_VALUE) <= 0;
 	}
 
-	public long daysBeforeRoomba() {
+	public OptionalLong daysBeforeRoomba() {
 		Instant now = Instant.now();
 		long result = Long.MAX_VALUE;
 		/* RemoveDeadQuestions and RemoveMigrationStubs */
@@ -361,7 +362,7 @@ public class BurninationQuestion implements Serializable {
 			long daysBeforeRoomba = DAYS.between(now, date.plus(9, DAYS)) + 1;
 			result = Math.min(result, daysBeforeRoomba);
 		}
-		return result;
+		return result == Long.MAX_VALUE ? OptionalLong.empty() : OptionalLong.of(result);
 	}
 
 	private static Instant toNextUTCSaturday(Instant instant) {
