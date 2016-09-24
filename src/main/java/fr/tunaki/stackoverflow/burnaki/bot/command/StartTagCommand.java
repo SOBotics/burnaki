@@ -8,13 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import fr.tunaki.stackoverflow.burnaki.BurninationManager;
-import fr.tunaki.stackoverflow.burnaki.bot.BurnRoom;
 import fr.tunaki.stackoverflow.burnaki.bot.Burnaki;
 import fr.tunaki.stackoverflow.burnaki.bot.BurnakiProperties;
-import fr.tunaki.stackoverflow.chat.ChatHost;
 import fr.tunaki.stackoverflow.chat.Message;
 import fr.tunaki.stackoverflow.chat.Room;
-import fr.tunaki.stackoverflow.chat.StackExchangeClient;
 import fr.tunaki.stackoverflow.chat.User;
 
 @Component
@@ -24,13 +21,11 @@ public class StartTagCommand implements Command {
 
 	private BurnakiProperties properties;
 	private BurninationManager burninationManager;
-	private StackExchangeClient client;
 
 	@Autowired
-	public StartTagCommand(BurnakiProperties properties, BurninationManager burninationManager, StackExchangeClient client) {
+	public StartTagCommand(BurnakiProperties properties, BurninationManager burninationManager) {
 		this.properties = properties;
 		this.burninationManager = burninationManager;
-		this.client = client;
 	}
 
 	@Override
@@ -86,10 +81,7 @@ public class StartTagCommand implements Command {
 			LOGGER.error("Cannot start burnination of tag [{}]", tag, e);
 			room.replyTo(messageId, "Cannot start burnination of tag \\[" + tag + "\\]: " + e.getMessage());
 		}
-		if (roomId != properties.getHqRoomId()) {
-			BurnRoom br = burnaki.getBurnRooms().computeIfAbsent(roomId, r -> new BurnRoom(client.joinRoom(ChatHost.valueOf(properties.getHost()), r), tag));
-			burnaki.registerEventListeners(br.getRoom());
-		}
+		burnaki.addBurnination(tag, roomId);
 	}
 
 }

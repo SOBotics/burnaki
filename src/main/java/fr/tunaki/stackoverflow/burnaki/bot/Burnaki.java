@@ -120,7 +120,7 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 			String tag = events.get(0).getTag();
 			BurnRoom burnRoom = burnRooms.getOrDefault(tagsMap.get(tag), hqRoom);
 			boolean singleTag = burnRoom.getTags().size() == 1;
-			List<String> messages = events.stream().collect(groupingBy(BurninationUpdateEvent::getEvent, mapping(e -> "[" + sanitizeChatMessage(e.getQuestion().getTitle()) + "](" + e.getQuestion().getShareLink() + ")", joining(", ", ": ", ".")))).entrySet().stream().map(e -> "\\[ [Burnaki](//stackapps.com/q/7027) \\] " + (singleTag ? "" : "\\[" + tag + "\\] ") + e.getKey().getDisplay() + e.getValue()).collect(toList());
+			List<String> messages = events.stream().collect(groupingBy(BurninationUpdateEvent::getEvent, mapping(e -> "[" + sanitizeChatMessage(e.getQuestion().getTitle()) + "](" + e.getQuestion().getShareLink() + ")", joining(", ", ": ", ".")))).entrySet().stream().map(e -> "\\[ [Burnaki](//stackapps.com/q/7027) \\] " + (singleTag ? "" : "[tag:" + tag + "] ") + e.getKey().getDisplay() + e.getValue()).collect(toList());
 			messages.forEach(burnRoom.getRoom()::send);
 		}
 	}
@@ -138,13 +138,24 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 		burninationManager.addListener(this);
 	}
 
+	public void addBurnination(String tag, int roomId) {
+		BurnRoom br = burnRooms.computeIfAbsent(roomId, r -> new BurnRoom(client.joinRoom(ChatHost.valueOf(properties.getHost()), r), tag));
+		tagsMap.put(tag, roomId);
+		registerEventListeners(br.getRoom());
+	}
+
+	public void removeBurnination(String tag, int roomId) {
+		burnRooms.get(roomId).getTags().remove(tag);
+		tagsMap.remove(tag);
+	}
+
+	public void removeBurnRoom(int roomId) {
+		burnRooms.remove(roomId);
+	}
+
 	@Override
 	public void close() throws IOException {
 		client.close();
-	}
-
-	public Map<Integer, BurnRoom> getBurnRooms() {
-		return burnRooms;
 	}
 
 }

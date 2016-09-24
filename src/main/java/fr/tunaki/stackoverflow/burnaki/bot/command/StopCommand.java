@@ -60,7 +60,7 @@ public class StopCommand implements Command {
 		if (roomId == properties.getHqRoomId()) {
 			room.send("Bye.").thenRun(context::close);
 		} else {
-			room.send("Okay, I'm leaving this room.").thenRun(room::leave).thenRun(() -> burnaki.getBurnRooms().remove(roomId));
+			room.send("Okay, I'm leaving this room.").thenRun(room::leave).thenRun(() -> burnaki.removeBurnRoom(roomId));
 		}
 	}
 
