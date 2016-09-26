@@ -72,4 +72,4 @@ This command ends the burnination process of the given tag. No new notifications
 
 # Accounts
 
-The bot runs under the user [Burnaki](http://stackoverflow.com/users/6738757/burnaki) and sits in [SOCVFinder](http://chat.stackoverflow.com/rooms/111347/socvfinder) chat room.
+The bot runs under the user [Burnaki](http://stackoverflow.com/users/6738757/burnaki) and sits in the [SOBotics](http://chat.stackoverflow.com/rooms/111347/sobotics) chat room on Stack Overflow.
