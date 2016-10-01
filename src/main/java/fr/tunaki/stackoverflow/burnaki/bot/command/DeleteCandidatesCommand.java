@@ -114,7 +114,7 @@ public class DeleteCandidatesCommand implements Command {
 		return conn;
 	}
 
-	private JsonObject burninationQuestionsToJson(List<BurninationQuestion> bqs, long roomId, String tag) {
+	private JsonObject burninationQuestionsToJson(List<BurninationQuestion> bqs, int roomId, String tag) {
 		JsonObject json = new JsonObject();
 		json.addProperty("timestamp", Instant.now().getEpochSecond());
 		json.addProperty("room_id", roomId);

@@ -66,7 +66,7 @@ public class StopTagCommand implements Command {
 			LOGGER.error("Cannot stop burnination of tag [{}]", tag, e);
 			room.replyTo(messageId, "Cannot stop burnination of tag \\[" + tag + "\\]: " + e.getMessage());
 		}
-		burnaki.removeBurnination(tag, (int) room.getRoomId());
+		burnaki.removeBurnination(tag, room.getRoomId());
 	}
 
 }

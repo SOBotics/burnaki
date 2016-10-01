@@ -56,7 +56,7 @@ public class StopCommand implements Command {
 			room.send("Nope. Only a moderator, a room owner or Tunaki can stop me.");
 			return;
 		}
-		int roomId = (int) room.getRoomId();
+		int roomId = room.getRoomId();
 		if (roomId == properties.getHqRoomId()) {
 			room.send("Bye.").thenRun(context::close);
 		} else {
