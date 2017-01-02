@@ -130,7 +130,7 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 		ChatHost chatHost = ChatHost.valueOf(properties.getHost());
 		hqRoom = new BurnRoom(client.joinRoom(chatHost, properties.getHqRoomId()));
 		Map<Integer, List<String>> idToTags = burninationManager.getBurnRooms();
-		burnRooms = idToTags.entrySet().stream().collect(toMap(Map.Entry::getKey, e -> new BurnRoom(client.joinRoom(chatHost, e.getKey()), e.getValue())));
+		burnRooms = idToTags.entrySet().stream().filter(e -> e.getKey() != hqRoom.getRoom().getRoomId()).collect(toMap(Map.Entry::getKey, e -> new BurnRoom(client.joinRoom(chatHost, e.getKey()), e.getValue())));
 		tagsMap = idToTags.entrySet().stream().flatMap(e -> e.getValue().stream().map(t -> new AbstractMap.SimpleEntry<>(e.getKey(), t))).collect(toMap(Map.Entry::getValue, Map.Entry::getKey));
 		registerEventListeners(hqRoom.getRoom());
 		hqRoom.getRoom().send("Hiya o/");
@@ -139,9 +139,11 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 	}
 
 	public void addBurnination(String tag, int roomId) {
-		BurnRoom br = burnRooms.computeIfAbsent(roomId, r -> new BurnRoom(client.joinRoom(ChatHost.valueOf(properties.getHost()), r), tag));
+		if (roomId != hqRoom.getRoom().getRoomId()) {
+			BurnRoom br = burnRooms.computeIfAbsent(roomId, r -> new BurnRoom(client.joinRoom(ChatHost.valueOf(properties.getHost()), r), tag));
+			registerEventListeners(br.getRoom());
+		}
 		tagsMap.put(tag, roomId);
-		registerEventListeners(br.getRoom());
 	}
 
 	public void removeBurnination(String tag, int roomId) {
