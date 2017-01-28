@@ -27,6 +27,7 @@ public class Question {
 	private boolean answered;
 	private String closedReason;
 	private boolean migrated;
+	private SuggestedEdit pendingSuggestedEdit;
 
 	public int getId() {
 		return id;
@@ -202,6 +203,14 @@ public class Question {
 
 	public void setMigrated(boolean migrated) {
 		this.migrated = migrated;
+	}
+
+	public SuggestedEdit getPendingSuggestedEdit() {
+		return pendingSuggestedEdit;
+	}
+
+	public void setPendingSuggestedEdit(SuggestedEdit pendingSuggestedEdit) {
+		this.pendingSuggestedEdit = pendingSuggestedEdit;
 	}
 
 }

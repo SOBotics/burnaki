@@ -16,9 +16,14 @@ public class StackExchangeAPIProperties {
 	private String key;
 
 	/**
-	 * Search filter to use when querying the API.
+	 * Search filter to use when querying the API for list of questions.
 	 */
-	private String filter;
+	private String questionFilter;
+
+	/**
+	 * Search filter to use when querying the API for list of suggested edits on given posts.
+	 */
+	private String suggestedEditFilter;
 
 	/**
 	 * Root URL of the API. Example: <code>https://api.stackexchange.com/2.2</code>.
@@ -51,12 +56,20 @@ public class StackExchangeAPIProperties {
 		this.key = key;
 	}
 
-	public String getFilter() {
-		return filter;
+	public String getQuestionFilter() {
+		return questionFilter;
 	}
 
-	public void setFilter(String filter) {
-		this.filter = filter;
+	public void setQuestionFilter(String filter) {
+		this.questionFilter = filter;
+	}
+
+	public String getSuggestedEditFilter() {
+		return suggestedEditFilter;
+	}
+
+	public void setSuggestedEditFilter(String suggestedEditFilter) {
+		this.suggestedEditFilter = suggestedEditFilter;
 	}
 
 	public String getRootUrl() {

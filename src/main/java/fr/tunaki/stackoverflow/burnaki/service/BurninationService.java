@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import fr.tunaki.stackoverflow.burnaki.BurnakiException;
 import fr.tunaki.stackoverflow.burnaki.api.Question;
 import fr.tunaki.stackoverflow.burnaki.api.StackExchangeAPIService;
+import fr.tunaki.stackoverflow.burnaki.api.SuggestedEdit;
 import fr.tunaki.stackoverflow.burnaki.entity.Burnination;
 import fr.tunaki.stackoverflow.burnaki.entity.BurninationProgress;
 import fr.tunaki.stackoverflow.burnaki.entity.BurninationQuestion;
@@ -209,6 +210,16 @@ public class BurninationService {
 				events.add(new BurninationUpdateEvent(BurninationUpdateEvent.Event.RETAGGED_WITHOUT, tag, burninationQuestion));
 			}
 			burninationQuestion.setRetagged(true);
+		}
+
+		SuggestedEdit pending = question.getPendingSuggestedEdit();
+		if (pending != null && pending.getTags() != null) {
+			if (pending.getTags().contains(tag) && !question.getTags().contains(tag)) {
+				burninationQuestion.addHistory(new BurninationQuestionHistory(burninationQuestion, "SUGGESTED EDIT WITH", pending.getCreationDate()));
+			} else if (!pending.getTags().contains(tag) && question.getTags().contains(tag)) {
+				burninationQuestion.addHistory(new BurninationQuestionHistory(burninationQuestion, "SUGGESTED EDIT WITHOUT", pending.getCreationDate()));
+				events.add(new BurninationUpdateEvent(BurninationUpdateEvent.Event.SUGGESTED_EDIT_WITHOUT, tag, burninationQuestion));
+			}
 		}
 
 		if (burninationQuestion.getDeletedDate() != null) {

@@ -20,7 +20,7 @@ During a burnination process of a tag, notifications will be sent to the dedicat
 
  - When a question has been closed. The goal is to ensure the question gets attraction for a potential inappropriate close.
  - When a reopen vote is cast on a closed question. This means that the question was potentially wrongly closed during the effort and needs to be re-reviewed.
- - When an edit is made to a question removing the tag being burninated. This helps to track which questions were edited and potentially act on wrong edits or users on an edit-spree.
+ - When an edit is made, or has been suggested, to a question removing the tag being burninated. This helps to track which questions were edited and potentially act on wrong edits or users on an edit-spree.
  - When a question is deleted. In the same way as closed questions, the goal is to make sure the question gets another review.
  - When a question is undeleted. This means that the question was wrongly deleted and needs attention. _NOTE: the Stack Exchange API does not return deleted posts, so it is not possible to raise a notification when an undelete vote is cast_.
  - When a new question is posted.
