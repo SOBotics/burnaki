@@ -190,7 +190,7 @@ public class StackExchangeAPIService {
 	}
 
 	private JsonObject get(String method, String filter, String... data) throws IOException {
-		Response response = Jsoup.connect(properties.getRootUrl() + method).data(data).data("site", properties.getSite(), "key", properties.getKey(), "filter", filter, "pageSize", properties.getPageSize()).method(Method.GET).ignoreContentType(true).ignoreHttpErrors(true).execute();
+		Response response = Jsoup.connect(properties.getRootUrl() + method).data(data).data("site", properties.getSite(), "key", properties.getKey(), "filter", filter, "pageSize", properties.getPageSize()).method(Method.GET).ignoreContentType(true).ignoreHttpErrors(true).timeout(10 * 1000).execute();
 		String json = response.body();
 		if (response.statusCode() != 200) {
 			throw new IOException("HTTP " + response.statusCode() + " fetching URL " + (properties.getRootUrl() + method) + ". Body is: " + response.body());
