@@ -32,7 +32,7 @@ public class StopTagCommand implements Command {
 
 	@Override
 	public String getDescription() {
-		return "Stops the burnination of the given tag. Can be omitted if ran inside the dedicated burn room.";
+		return "Stops the burnination of the given tag. The tag can be omitted if ran inside the dedicated burn room.";
 	}
 
 	@Override
