@@ -55,7 +55,7 @@ The progress is updated automatically every hour. This command forces an update 
 
 ### `@burnaki delete candidates [tag]`
 
-This command queries all posts that are eligible for deletion. It queries posts that have a score <= -2, are closed since more than 2 days and have at least one answer. It also returns posts with pending delete votes.
+This command queries all posts that are eligible for deletion. It queries posts that have a score <= -1, are closed since more than 2 days and have at least one answer. It also returns posts with pending delete votes.
 
 ![Sample list](http://i.stack.imgur.com/dUlb8.png)
 
