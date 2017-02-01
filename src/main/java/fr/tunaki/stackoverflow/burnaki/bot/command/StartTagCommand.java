@@ -54,6 +54,11 @@ public class StartTagCommand implements Command {
 	}
 
 	@Override
+	public boolean requiresValidTag() {
+		return true;
+	}
+
+	@Override
 	public void execute(Message message, Room room, Burnaki burnaki, String[] arguments) {
 		int roomId;
 		long messageId = message.getId();

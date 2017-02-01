@@ -39,6 +39,13 @@ public interface Command {
 	int argumentCount();
 
 	/**
+	 * Whether this command requires a valid tag as first parameter. When it doesn't require a tag, or can take a tag that doesn't
+	 * exist remotely, this returns <code>false</code>.
+	 * @return <code>true</code> if this command requires a valid tag as first parameter.
+	 */
+	boolean requiresValidTag();
+
+	/**
 	 * Execute the command.
 	 * @param message Message that triggered the command.
 	 * @param room Room where the message was posted.

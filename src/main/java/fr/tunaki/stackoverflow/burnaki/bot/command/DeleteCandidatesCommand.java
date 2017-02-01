@@ -74,6 +74,11 @@ public class DeleteCandidatesCommand implements Command {
 	}
 
 	@Override
+	public boolean requiresValidTag() {
+		return true;
+	}
+
+	@Override
 	public void execute(Message message, Room room, Burnaki burnaki, String[] arguments) {
 		String tag = arguments[0];
 		String json = burninationQuestionsToJson(burninationManager.getDeleteCandidates(tag), room.getRoomId(), tag).toString();

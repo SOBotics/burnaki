@@ -53,6 +53,11 @@ public class CommandsCommand implements Command {
 	}
 
 	@Override
+	public boolean requiresValidTag() {
+		return false;
+	}
+
+	@Override
 	public void execute(Message message, Room room, Burnaki burnaki, String[] arguments) {
 		int maxUsageLength = commands.stream().map(Command::getUsage).mapToInt(String::length).max().orElse(0);
 		room.replyTo(message.getId(), "Here's a list of commands:");

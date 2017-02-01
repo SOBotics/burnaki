@@ -88,7 +88,7 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 					if (arguments.length < command.argumentCount()) {
 						room.getRoom().send("Not enough arguments for command `" + command.getName() + "`. Usage is: `" + command.getUsage() + "`.");
 						return;
-					} else if (arguments.length > 0) {
+					} else if (arguments.length > 0 && command.requiresValidTag()) {
 						arguments[0] = cleanTag(arguments[0]);
 						if (!apiService.isValidTag(arguments[0])) {
 							LOGGER.warn("Tag [{}] doesn't exist", arguments[0]);

@@ -46,6 +46,11 @@ public class QuotaCommand implements Command {
 	}
 
 	@Override
+	public boolean requiresValidTag() {
+		return false;
+	}
+
+	@Override
 	public void execute(Message message, Room room, Burnaki burnaki, String[] arguments) {
 		room.replyTo(message.getId(), "Remaining quota is: " + apiService.getQuotaRemaining());
 	}

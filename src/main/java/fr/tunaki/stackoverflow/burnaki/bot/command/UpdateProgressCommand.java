@@ -50,6 +50,11 @@ public class UpdateProgressCommand implements Command {
 	}
 
 	@Override
+	public boolean requiresValidTag() {
+		return true;
+	}
+
+	@Override
 	public void execute(Message message, Room room, Burnaki burnaki, String[] arguments) {
 		String tag = arguments[0];
 		try {

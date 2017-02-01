@@ -51,6 +51,11 @@ public class StopTagCommand implements Command {
 	}
 
 	@Override
+	public boolean requiresValidTag() {
+		return false; // it could be the case that the tag was already purged from the system when running the command
+	}
+
+	@Override
 	public void execute(Message message, Room room, Burnaki burnaki, String[] arguments) {
 		String tag = arguments[0];
 		long messageId = message.getId();

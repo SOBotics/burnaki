@@ -50,6 +50,11 @@ public class StopCommand implements Command {
 	}
 
 	@Override
+	public boolean requiresValidTag() {
+		return false;
+	}
+
+	@Override
 	public void execute(Message message, Room room, Burnaki burnaki, String[] arguments) {
 		User user = message.getUser();
 		if (!user.isModerator() && !user.isRoomOwner() && user.getId() != 1743880) {
