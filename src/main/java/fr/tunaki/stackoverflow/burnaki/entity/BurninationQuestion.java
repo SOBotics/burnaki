@@ -347,22 +347,49 @@ public class BurninationQuestion implements Serializable {
 		/* RemoveDeadQuestions and RemoveMigrationStubs */
 		if (score <= -1 && answerCount == 0 && !locked || migrated) {
 			int delta = 30;
-			long daysBeforeRoomba = DAYS.between(now, toNextUTCSaturday(createdDate.plus(delta, DAYS))) + 1;
-			result = Math.min(result, daysBeforeRoomba);
+			result = Math.min(result, daysBeforePossibleRoomba(now, toNextUTCSaturday(createdDate.plus(delta, DAYS))));
 		}
 		/* RemoveAbandonedQuestions */
 		if (score == 0 && answerCount == 0 && !locked && commentCount <= 1) {
 			int delta = Math.max(365, (int) (viewCount / 1.5) + 1);
-			long daysBeforeRoomba = DAYS.between(now, toNextUTCSaturday(createdDate.plus(delta, DAYS))) + 1;
-			result = Math.min(result, daysBeforeRoomba);
+			result = Math.min(result, daysBeforePossibleRoomba(now, toNextUTCSaturday(createdDate.plus(delta, DAYS))));
 		}
 		/* RemoveAbandonedClosed */
 		if (closedDate != null && !closedAsDuplicate && score <= 0 && !locked && !answered && acceptedAnswerId == null && reopenVoteCount == 0) {
 			Instant date = lastEditDate == null || closedDate.isAfter(lastEditDate) ? closedDate : lastEditDate;
-			long daysBeforeRoomba = DAYS.between(now, date.plus(9, DAYS)) + 1;
-			result = Math.min(result, daysBeforeRoomba);
+			result = Math.min(result, daysBeforePossibleRoomba(now, date.plus(9, DAYS)));
 		}
 		return result == Long.MAX_VALUE ? OptionalLong.empty() : OptionalLong.of(result);
+	}
+
+	/**
+	 * Returns the number of whole days to wait before a possible roomba event can happen, given the current date and another date.
+	 * <p>
+	 * This calculates the number of whole days between the two dates. Since this number is truncated to the day, we need to take into account
+	 * whether the given date is before or after the current date (but in the same 24h interval); if it is after, then we'll need to wait
+	 * another full day before a roomba can happen.
+	 * <p>
+	 * To clear this up, consider the case where the date is after the current date:
+	 * <pre>
+	 * --D----------------D+1----------
+	 *      ^      ^
+	 *     NOW    DATE
+	 * </pre>
+	 * <p>
+	 * in which case, the roomba event can only happen the day after, to reach:
+	 * <pre>
+	 * --D----------------D+1----------
+	 *             ^             ^
+	 *            DATE          NOW
+	 * </pre>
+	 * @param now Current date for the check.
+	 * @param date Date to test against.
+	 * @return Number of whole days to wait before a roomba event, when checking about the given date. When this is negative or zero, it
+	 * means the event already happened.
+	 */
+	private static long daysBeforePossibleRoomba(Instant now, Instant date) {
+		long days = DAYS.between(now, date);
+		return date.isAfter(now) ? days + 1 : days;
 	}
 
 	private static Instant toNextUTCSaturday(Instant instant) {
