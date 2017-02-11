@@ -20,6 +20,7 @@ import org.knowm.xchart.BitmapEncoder.BitmapFormat;
 import org.knowm.xchart.XYChart;
 import org.knowm.xchart.XYChartBuilder;
 import org.knowm.xchart.style.colors.XChartSeriesColors;
+import org.knowm.xchart.style.markers.Marker;
 import org.knowm.xchart.style.markers.SeriesMarkers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,14 +115,14 @@ public class GetProgressCommand implements Command {
 			yRoombad.add(progress.getRoombad());
 		}
 
-		XYChart chart = new XYChartBuilder().width(500).height(400).title("Burnination progress").xAxisTitle("Time").yAxisTitle("Number of questions").build();
-		chart.getStyler().setChartBackgroundColor(Color.WHITE);
-		chart.getStyler().setDatePattern("dd/MM").setMarkerSize(4).setPlotGridVerticalLinesVisible(false).setYAxisMin(0d);
-		chart.addSeries("Closed", x, yClosed).setMarker(SeriesMarkers.CIRCLE).setMarkerColor(Color.ORANGE).setLineWidth(0.5f).setLineColor(XChartSeriesColors.BLUE);
-		chart.addSeries("Retagged", x, yRetagged).setMarker(SeriesMarkers.CIRCLE).setMarkerColor(Color.GREEN).setLineWidth(0.5f).setLineColor(XChartSeriesColors.BLUE);
-		chart.addSeries("Deleted", x, yDeleted).setMarker(SeriesMarkers.CIRCLE).setMarkerColor(Color.RED).setLineWidth(0.5f).setLineColor(XChartSeriesColors.BLUE);
-		chart.addSeries("Roombad", x, yRoombad).setMarker(SeriesMarkers.CIRCLE).setMarkerColor(Color.MAGENTA).setLineWidth(0.5f).setLineColor(XChartSeriesColors.BLUE);
-		chart.addSeries("Remaining", x, yRemaining).setMarker(SeriesMarkers.CIRCLE).setMarkerColor(Color.BLACK).setLineWidth(0.5f).setLineColor(XChartSeriesColors.BLUE);
+		XYChart chart = new XYChartBuilder().width(660).height(400).title("Burnination progress").xAxisTitle("Time").yAxisTitle("Number of questions").build();
+		chart.getStyler().setChartBackgroundColor(Color.WHITE).setLegendSeriesLineLength(12).setSeriesMarkers(new Marker[] { SeriesMarkers.NONE });
+		chart.getStyler().setDatePattern("dd/MM").setMarkerSize(3).setPlotGridVerticalLinesVisible(false).setYAxisMin(0d).setXAxisTickMarkSpacingHint(1);
+		chart.addSeries("Closed", x, yClosed).setLineColor(XChartSeriesColors.ORANGE);
+		chart.addSeries("Retagged", x, yRetagged).setLineColor(XChartSeriesColors.GREEN);
+		chart.addSeries("Deleted", x, yDeleted).setLineColor(XChartSeriesColors.RED);
+		chart.addSeries("Roombad", x, yRoombad).setLineColor(XChartSeriesColors.MAGENTA);
+		chart.addSeries("Remaining", x, yRemaining).setLineColor(XChartSeriesColors.BLACK);
 
 		Path path;
 		InputStream is;
