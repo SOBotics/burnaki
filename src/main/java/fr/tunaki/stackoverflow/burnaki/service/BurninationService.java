@@ -62,6 +62,7 @@ public class BurninationService {
 		burnination.setStartDate(Instant.now());
 		burnination.setRoomId(roomId);
 		burnination.setMetaLink(metaLink);
+		burnination.setLastRefreshDate(Instant.now());
 		for (Question question : apiService.getQuestionsInTag(tag, null)) {
 			BurninationQuestion burninationQuestion = new BurninationQuestion(burnination, question.getId());
 			burnination.addQuestion(burninationQuestion);
@@ -75,13 +76,17 @@ public class BurninationService {
 	public List<BurninationUpdateEvent> update(String tag) {
 		Burnination burnination = getCurrentBurninationForTag(tag);
 		LOGGER.debug("Updating the burnination of tag [{}]", tag);
+
+		// fetching last refresh date minus 5 minutes to account for the delay of doing all this work
+		Instant from = burnination.getLastRefreshDate().minus(5, ChronoUnit.MINUTES);
+
 		List<BurninationUpdateEvent> events = new ArrayList<>();
 		Map<Integer, BurninationQuestion> presentMap = burnination.getQuestions().stream().collect(toMap(bq -> bq.getId().getQuestionId(), Function.identity()));
 		Set<Integer> keySet = presentMap.keySet();
-		List<Question> results = apiService.getQuestionsWithIds(keySet);
+		List<Question> results = apiService.getQuestionsWithIds(keySet, from);
 
 		// identify deleted questions not returned by API (those for which the ID was given but nothing was returned)
-		Set<Integer> returnedIds = results.stream().map(t -> t.getId()).collect(toSet());
+		Set<Integer> returnedIds = results.stream().map(Question::getId).collect(toSet());
 		Map<Integer, BurninationQuestion> deltas = new HashMap<>(presentMap);
 		deltas.keySet().removeAll(returnedIds);
 		for (BurninationQuestion bq : deltas.values()) {
@@ -107,8 +112,7 @@ public class BurninationService {
 			events.addAll(populateBurninationQuestion(question, burninationQuestion, tag));
 		}
 
-		// add to burn list new questions posted in burn tag since last refresh (minus 5 minutes to account for the delay of doing all this work)
-		Instant from = burnination.getLastRefreshDate() == null ? null : burnination.getLastRefreshDate().minus(5, ChronoUnit.MINUTES);
+		// add to burn list new questions posted in burn tag since last refresh
 		for (Question question : apiService.getQuestionsInTag(tag, from).stream().filter(q -> !presentMap.containsKey(q.getId())).collect(toList())) {
 			LOGGER.debug("New question with id {} asked in tag under burnination [{}]", question.getId(), tag);
 			BurninationQuestion burninationQuestion = new BurninationQuestion(burnination, question.getId());

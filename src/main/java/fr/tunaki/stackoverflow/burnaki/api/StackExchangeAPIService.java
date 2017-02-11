@@ -12,10 +12,10 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.jsoup.Connection.Method;
@@ -66,7 +66,10 @@ public class StackExchangeAPIService {
 			} else {
 				root = get("/questions", properties.getQuestionFilter(), "tagged", tag, "fromdate", String.valueOf(from.getEpochSecond()), "page", String.valueOf(page));
 			}
-			List<Question> questions = toQuestions(root, o -> itemToQuestion(o, new HashMap<>()));
+			String ids = withMapper(root, o -> o.get("question_id").getAsString()).collect(joining(";"));
+			LOGGER.debug("Retrieving all suggested edits for posts with ids '{}'", ids);
+			Map<Integer, List<SuggestedEdit>> edits = toSuggestedEditMap(get("/posts/" + ids + "/suggested-edits", properties.getSuggestedEditFilter()));
+			List<Question> questions = withMapper(root, o -> itemToQuestion(o, edits)).collect(toCollection(ArrayList::new));
 			if (root.get("has_more").getAsBoolean()) {
 				questions.addAll(getQuestionsWithTag(tag, from, page + 1));
 			}
@@ -76,10 +79,41 @@ public class StackExchangeAPIService {
 		}
 	}
 
-	public List<Question> getQuestionsWithIds(Collection<Integer> ids) {
+	public List<Question> getQuestionsWithIds(Collection<Integer> ids, Instant from) {
 		LOGGER.debug("Retrieving all questions with ids '{}'", ids);
+		Map<Integer, List<SuggestedEdit>> edits;
+		try {
+			LOGGER.debug("Retrieving all suggested edits for posts from date '{}'", from);
+			edits = getSuggestedEditsFromDate(from, 1);
+		} catch (IOException e) {
+			throw new BurnakiException("Cannot fetch new suggested edits", e);
+		}
 		List<String> idsStr = ids.stream().map(Object::toString).collect(unorderedBatchesWith(100, joining(";")));
-		return idsStr.stream().flatMap(s -> getQuestionsWithIds(s, 1).stream()).collect(toList());
+		return idsStr.stream().flatMap(s -> getQuestionsWithIds(s, edits, 1).stream()).collect(toList());
+	}
+
+	private List<Question> getQuestionsWithIds(String ids, Map<Integer, List<SuggestedEdit>> edits, int page) {
+		LOGGER.debug("Retrieving all questions with ids '{}', page {}", ids, page);
+		try {
+			JsonObject root = get("/questions/" + ids, properties.getQuestionFilter(), "page", String.valueOf(page));
+
+			List<Question> questions = withMapper(root, o -> itemToQuestion(o, edits)).collect(toCollection(ArrayList::new));
+			if (root.get("has_more").getAsBoolean()) {
+				questions.addAll(getQuestionsWithIds(ids, edits, page + 1));
+			}
+			return questions;
+		} catch (IOException e) {
+			throw new BurnakiException("Cannot fetch questions with ids", e);
+		}
+	}
+
+	private Map<Integer, List<SuggestedEdit>> getSuggestedEditsFromDate(Instant from, int page) throws IOException {
+		JsonObject root = get("/suggested-edits", properties.getSuggestedEditFilter(), "fromdate", String.valueOf(from.getEpochSecond()), "page", String.valueOf(page));
+		Map<Integer, List<SuggestedEdit>> edits = toSuggestedEditMap(root);
+		if (root.get("has_more").getAsBoolean()) {
+			edits.putAll(getSuggestedEditsFromDate(from, page + 1));
+		}
+		return edits;
 	}
 
 	public boolean isValidTag(String tag) {
@@ -90,32 +124,14 @@ public class StackExchangeAPIService {
 		} catch (IOException e) {
 			throw new BurnakiException("Cannot fetch tags", e);
 		}
-
 	}
 
-	private List<Question> getQuestionsWithIds(String ids, int page) {
-		LOGGER.debug("Retrieving all questions with ids '{}', page {}", ids, page);
-		try {
-			JsonObject root = get("/questions/" + ids, properties.getQuestionFilter(), "page", String.valueOf(page));
-			Map<Integer, List<SuggestedEdit>> edits = getSuggestedEditsForPosts(ids);
-			List<Question> questions = toQuestions(root, o -> itemToQuestion(o, edits));
-			if (root.get("has_more").getAsBoolean()) {
-				questions.addAll(getQuestionsWithIds(ids, page + 1));
-			}
-			return questions;
-		} catch (IOException e) {
-			throw new BurnakiException("Cannot fetch questions with ids", e);
-		}
+	private Map<Integer, List<SuggestedEdit>> toSuggestedEditMap(JsonObject root) {
+		return withMapper(root, Function.identity()).collect(groupingBy(o -> o.get("post_id").getAsInt(), mapping(this::itemToSuggestedEdit, toList())));
 	}
 
-	private Map<Integer, List<SuggestedEdit>> getSuggestedEditsForPosts(String ids) throws IOException {
-		LOGGER.debug("Retrieving all suggested edits for posts with ids '{}'", ids);
-		JsonObject root = get("/posts/" + ids + "/suggested-edits", properties.getSuggestedEditFilter());
-		return StreamSupport.stream(root.get("items").getAsJsonArray().spliterator(), false).map(JsonElement::getAsJsonObject).collect(groupingBy(o -> o.get("post_id").getAsInt(), mapping(this::itemToSuggestedEdit, toList())));
-	}
-
-	private <T> List<T> toQuestions(JsonObject root, Function<JsonObject, T> mapper) {
-		return StreamSupport.stream(root.get("items").getAsJsonArray().spliterator(), false).map(JsonElement::getAsJsonObject).map(mapper::apply).collect(toCollection(ArrayList::new));
+	private <T> Stream<T> withMapper(JsonObject root, Function<JsonObject, T> mapper) {
+		return StreamSupport.stream(root.get("items").getAsJsonArray().spliterator(), false).map(JsonElement::getAsJsonObject).map(mapper::apply);
 	}
 
 	private Question itemToQuestion(JsonObject object, Map<Integer, List<SuggestedEdit>> editsPosts) {
