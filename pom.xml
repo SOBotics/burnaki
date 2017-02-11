@@ -14,6 +14,7 @@
     <hibernate.version>5.2.6.Final</hibernate.version>
     <log4j.version>1.2.17</log4j.version>
     <mysql.version>5.1.40</mysql.version>
+    <xchart.version>3.2.2</xchart.version>
   </properties>
   <repositories>
     <repository>
@@ -42,7 +43,7 @@
     <dependency>
       <groupId>org.knowm.xchart</groupId>
       <artifactId>xchart</artifactId>
-      <version>3.2.0</version>
+      <version>${xchart.version}</version>
     </dependency>
   </dependencies>
   <build>

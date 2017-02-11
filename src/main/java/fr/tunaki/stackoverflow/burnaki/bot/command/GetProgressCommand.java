@@ -116,7 +116,7 @@ public class GetProgressCommand implements Command {
 
 		XYChart chart = new XYChartBuilder().width(500).height(400).title("Burnination progress").xAxisTitle("Time").yAxisTitle("Number of questions").build();
 		chart.getStyler().setChartBackgroundColor(Color.WHITE);
-		chart.getStyler().setDatePattern("dd/MM").setMarkerSize(4).setPlotGridVerticalLinesVisible(false).setYAxisMin(0);
+		chart.getStyler().setDatePattern("dd/MM").setMarkerSize(4).setPlotGridVerticalLinesVisible(false).setYAxisMin(0d);
 		chart.addSeries("Closed", x, yClosed).setMarker(SeriesMarkers.CIRCLE).setMarkerColor(Color.ORANGE).setLineWidth(0.5f).setLineColor(XChartSeriesColors.BLUE);
 		chart.addSeries("Retagged", x, yRetagged).setMarker(SeriesMarkers.CIRCLE).setMarkerColor(Color.GREEN).setLineWidth(0.5f).setLineColor(XChartSeriesColors.BLUE);
 		chart.addSeries("Deleted", x, yDeleted).setMarker(SeriesMarkers.CIRCLE).setMarkerColor(Color.RED).setLineWidth(0.5f).setLineColor(XChartSeriesColors.BLUE);
