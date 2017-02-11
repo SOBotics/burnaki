@@ -67,6 +67,9 @@ public class StackExchangeAPIService {
 				root = get("/questions", properties.getQuestionFilter(), "tagged", tag, "fromdate", String.valueOf(from.getEpochSecond()), "page", String.valueOf(page));
 			}
 			String ids = withMapper(root, o -> o.get("question_id").getAsString()).collect(joining(";"));
+			if (ids.isEmpty()) {
+				return Collections.emptyList();
+			}
 			LOGGER.debug("Retrieving all suggested edits for posts with ids '{}'", ids);
 			Map<Integer, List<SuggestedEdit>> edits = toSuggestedEditMap(get("/posts/" + ids + "/suggested-edits", properties.getSuggestedEditFilter()));
 			List<Question> questions = withMapper(root, o -> itemToQuestion(o, edits)).collect(toCollection(ArrayList::new));
