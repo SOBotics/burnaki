@@ -1,0 +1,34 @@
+version: '3.1'
+
+services:
+  burnaki-db:
+    image: mysql:5.7.22
+    environment:
+      - MYSQL_DATABASE=burnaki # MySQL database name
+      - MYSQL_USER=user # MySQL database username
+      - MYSQL_PASSWORD=password # MySQL database password
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+    volumes:
+      - ./database/:/var/lib/mysql/
+  burnaki:
+    image: g00glen00b/burnaki:1.0.1
+    environment:
+      - STACKEXCHANGE_API_SITE=stackoverflow
+      - STACKEXCHANGE_API_KEY=mykey # API key used to communicate with the Stack Exchange API
+      - STACKEXCHANGE_API_ROOT_URL=https://api.stackexchange.com/2.2
+      - STACKEXCHANGE_API_PAGE_SIZE=50
+      - STACKEXCHANGE_API_MAX_PAGE=66
+      - STACKEXCHANGE_API_QUESTION_FILTER=myfilter # Question API filter used to only retrieve the fields you need to fetch to make Burnaki work
+      - STACKEXCHANGE_API_SUGGESTED_EDIT_FILTER=myfilter # Suggested edit API filter used to retrieve the fields you need to fetch to make Burnaki work
+      - BURNAKI_BOT_HQ_ROOM_ID=167908 # ID of the room that the bot will initially join
+      - BURNAKI_BOT_HOST=STACK_OVERFLOW
+      - BURNINATION_SCHEDULER_REFRESH_QUESTIONS_EVERY=60 # Amount of minutes before the tagged questions are refreshed
+      - BURNINATION_SCHEDULER_REFRESH_PROGRESS_EVERY=60 # Amount of minutes before the progress is refreshed
+      - STACKEXCHANGE_CHAT_EMAIL=admin@example.org # Username of a Stack Exchange user with chat permissions
+      - STACKEXCHANGE_CHAT_PASSWORD=password # Password of a Stack Exchange user with chat permissions
+      - STACKEXCHANGE_CHAT_BOT_NAME=gemmy # Username of the Stack Exchange user with chat permissions
+      - DATABASE_HOST=burnaki-db # Database hostname, should be equal to the service name
+      - DATABASE_PORT=3306
+      - SPRING_DATASOURCE_URL=jdbc:mysql://burnaki-db/burnaki?useSSL=false # JDBC connection string
+      - SPRING_DATASOURCE_USERNAME=user # MySQL database username
+      - SPRING_DATASOURCE_PASSWORD=password # MySQL database password

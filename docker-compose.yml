@@ -1,0 +1,35 @@
+version: '3.1'
+
+services:
+  burnaki-db:
+    image: mysql:5.7.22
+    environment:
+      - MYSQL_DATABASE=burnaki
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=password
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+    volumes:
+      - ./database/:/var/lib/mysql/
+  # To make this work, create a file called .env with the following environment variables:
+  # - STACKEXCHANGE_API_KEY
+  # - STACKEXCHANGE_API_QUESTION_FILTER
+  # - STACKEXCHANGE_API_SUGGESTED_EDIT_FILTER
+  # - STACKEXCHANGE_CHAT_EMAIL
+  # - STACKEXCHANGE_CHAT_PASSWORD
+  # - STACKEXCHANGE_CHAT_BOT_NAME
+  burnaki:
+    image: g00glen00b/burnaki:1.0.0-SNAPSHOT
+    environment:
+      - STACKEXCHANGE_API_SITE=stackoverflow
+      - STACKEXCHANGE_API_ROOT_URL=https://api.stackexchange.com/2.2
+      - STACKEXCHANGE_API_PAGE_SIZE=50
+      - STACKEXCHANGE_API_MAX_PAGE=66
+      - BURNAKI_BOT_HQ_ROOM_ID=167908 # ID of the room that the bot will initially join
+      - BURNAKI_BOT_HOST=STACK_OVERFLOW
+      - BURNINATION_SCHEDULER_REFRESH_QUESTIONS_EVERY=60 # Amount of minutes before the tagged questions are refreshed
+      - BURNINATION_SCHEDULER_REFRESH_PROGRESS_EVERY=60 # Amount of minutes before the progress is refreshed
+      - DATABASE_HOST=burnaki-db # Database hostname, should be equal to the service name
+      - DATABASE_PORT=3306
+      - SPRING_DATASOURCE_URL=jdbc:mysql://burnaki-db/burnaki?useSSL=false # JDBC connection string
+      - SPRING_DATASOURCE_USERNAME=user # MySQL database username
+      - SPRING_DATASOURCE_PASSWORD=password # MySQL database password
