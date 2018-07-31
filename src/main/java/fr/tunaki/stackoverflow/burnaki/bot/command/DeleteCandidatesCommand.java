@@ -29,8 +29,8 @@ import fr.tunaki.stackoverflow.burnaki.api.StackExchangeAPIService;
 import fr.tunaki.stackoverflow.burnaki.bot.Burnaki;
 import fr.tunaki.stackoverflow.burnaki.bot.BurnakiProperties;
 import fr.tunaki.stackoverflow.burnaki.entity.BurninationQuestion;
-import fr.tunaki.stackoverflow.chat.Message;
-import fr.tunaki.stackoverflow.chat.Room;
+import org.sobotics.chatexchange.chat.Message;
+import org.sobotics.chatexchange.chat.Room;
 
 @Component
 public class DeleteCandidatesCommand implements Command {

@@ -12,7 +12,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 import fr.tunaki.stackoverflow.burnaki.api.StackExchangeAPIProperties;
 import fr.tunaki.stackoverflow.burnaki.bot.BurnakiProperties;
-import fr.tunaki.stackoverflow.chat.StackExchangeClient;
+import org.sobotics.chatexchange.chat.StackExchangeClient;
 
 @SpringBootApplication
 @EnableConfigurationProperties({StackExchangeAPIProperties.class, BurninationManagerProperties.class, BurnakiProperties.class})

@@ -25,11 +25,11 @@ import fr.tunaki.stackoverflow.burnaki.api.StackExchangeAPIService;
 import fr.tunaki.stackoverflow.burnaki.bot.command.Command;
 import fr.tunaki.stackoverflow.burnaki.service.BurninationUpdateEvent;
 import fr.tunaki.stackoverflow.burnaki.service.BurninationUpdateListener;
-import fr.tunaki.stackoverflow.chat.ChatHost;
-import fr.tunaki.stackoverflow.chat.Message;
-import fr.tunaki.stackoverflow.chat.Room;
-import fr.tunaki.stackoverflow.chat.StackExchangeClient;
-import fr.tunaki.stackoverflow.chat.event.EventType;
+import org.sobotics.chatexchange.chat.ChatHost;
+import org.sobotics.chatexchange.chat.Message;
+import org.sobotics.chatexchange.chat.Room;
+import org.sobotics.chatexchange.chat.StackExchangeClient;
+import org.sobotics.chatexchange.chat.event.EventType;
 
 @Component
 public class Burnaki implements Closeable, InitializingBean, BurninationUpdateListener {

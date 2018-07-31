@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import fr.tunaki.stackoverflow.chat.Room;
+import org.sobotics.chatexchange.chat.Room;
 
 public final class BurnRoom {
 

@@ -9,9 +9,9 @@ import org.springframework.stereotype.Component;
 
 import fr.tunaki.stackoverflow.burnaki.BurninationManager;
 import fr.tunaki.stackoverflow.burnaki.bot.Burnaki;
-import fr.tunaki.stackoverflow.chat.Message;
-import fr.tunaki.stackoverflow.chat.Room;
-import fr.tunaki.stackoverflow.chat.User;
+import org.sobotics.chatexchange.chat.Message;
+import org.sobotics.chatexchange.chat.Room;
+import org.sobotics.chatexchange.chat.User;
 
 @Component
 public class StopTagCommand implements Command {
