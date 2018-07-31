@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import fr.tunaki.stackoverflow.burnaki.ChatProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -41,23 +42,25 @@ public class Burnaki implements Closeable, InitializingBean, BurninationUpdateLi
 	private StackExchangeAPIService apiService;
 	private BurninationManager burninationManager;
 	private BurnakiProperties properties;
+	private ChatProperties chatProperties;
 
 	private BurnRoom hqRoom;
 	private Map<Integer, BurnRoom> burnRooms;
 	private Map<String, Integer> tagsMap;
 
 	@Autowired
-	public Burnaki(List<Command> commands, StackExchangeClient client, StackExchangeAPIService apiService, BurninationManager burninationScheduler, BurnakiProperties properties) {
+	public Burnaki(List<Command> commands, StackExchangeClient client, StackExchangeAPIService apiService, BurninationManager burninationScheduler, BurnakiProperties properties, ChatProperties chatProperties) {
 		this.commands = commands;
 		this.client = client;
 		this.apiService = apiService;
 		this.burninationManager = burninationScheduler;
 		this.properties = properties;
+		this.chatProperties = chatProperties;
 	}
 
 	public void registerEventListeners(Room room) {
 		room.addEventListener(EventType.USER_MENTIONED, event -> {
-			String stripped = event.getMessage().getPlainContent().toLowerCase().replaceAll("\\s*@bur[^\\s$]*\\s*", "").trim();
+			String stripped = event.getMessage().getPlainContent().toLowerCase().replaceAll("\\s*@" + chatProperties.getBotName().toLowerCase() + "[^\\s$]*\\s*", "").trim();
 			handleMessage(event.getMessage(), event.getRoomId(), stripped);
 		});
 		room.addEventListener(EventType.MESSAGE_REPLY, event -> {

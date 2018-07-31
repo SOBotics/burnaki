@@ -15,7 +15,7 @@ import fr.tunaki.stackoverflow.burnaki.bot.BurnakiProperties;
 import org.sobotics.chatexchange.chat.StackExchangeClient;
 
 @SpringBootApplication
-@EnableConfigurationProperties({StackExchangeAPIProperties.class, BurninationManagerProperties.class, BurnakiProperties.class})
+@EnableConfigurationProperties({StackExchangeAPIProperties.class, BurninationManagerProperties.class, BurnakiProperties.class, ChatProperties.class})
 @EnableScheduling
 public class Application {
 
@@ -29,8 +29,8 @@ public class Application {
 	}
 
 	@Bean
-	public StackExchangeClient stackExchangeClient(Environment environment) {
-		return new StackExchangeClient(environment.getProperty("stachexchange.chat.email"), environment.getProperty("stachexchange.chat.password"));
+	public StackExchangeClient stackExchangeClient(ChatProperties properties) {
+		return new StackExchangeClient(properties.getEmail(), properties.getPassword());
 	}
 
 }
