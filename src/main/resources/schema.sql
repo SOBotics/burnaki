@@ -1,18 +1,12 @@
 -- -----------------------------------------------------
 -- Schema burnaki
 -- -----------------------------------------------------
-DROP SCHEMA IF EXISTS `burnaki` ;
-
--- -----------------------------------------------------
--- Schema burnaki
--- -----------------------------------------------------
 CREATE SCHEMA IF NOT EXISTS `burnaki` DEFAULT CHARACTER SET utf8 ;
 USE `burnaki` ;
 
 -- -----------------------------------------------------
 -- Table `burnaki`.`burnination`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `burnaki`.`burnination` ;
 
 CREATE TABLE IF NOT EXISTS `burnaki`.`burnination` (
   `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
@@ -33,7 +27,6 @@ COLLATE = utf8_unicode_ci;
 -- -----------------------------------------------------
 -- Table `burnaki`.`burnination_progress`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `burnaki`.`burnination_progress` ;
 
 CREATE TABLE IF NOT EXISTS `burnaki`.`burnination_progress` (
   `burnination_id` BIGINT(20) NOT NULL,
@@ -59,7 +52,6 @@ COLLATE = utf8_unicode_ci;
 -- -----------------------------------------------------
 -- Table `burnaki`.`burnination_question`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `burnaki`.`burnination_question` ;
 
 CREATE TABLE IF NOT EXISTS `burnaki`.`burnination_question` (
   `burnination_id` BIGINT(20) NOT NULL,
@@ -102,7 +94,6 @@ COLLATE = utf8_unicode_ci;
 -- -----------------------------------------------------
 -- Table `burnaki`.`burnination_question_history`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `burnaki`.`burnination_question_history` ;
 
 CREATE TABLE IF NOT EXISTS `burnaki`.`burnination_question_history` (
   `burnination_id` BIGINT(20) NOT NULL,
