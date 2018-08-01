@@ -32,7 +32,6 @@ import fr.tunaki.stackoverflow.burnaki.entity.BurninationQuestion;
 import org.sobotics.chatexchange.chat.Message;
 import org.sobotics.chatexchange.chat.Room;
 
-@Component
 public class DeleteCandidatesCommand implements Command {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DeleteCandidatesCommand.class);
