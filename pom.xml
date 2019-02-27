@@ -17,16 +17,6 @@
     <xchart.version>3.3.0</xchart.version>
     <chatexchange.version>2.0.0</chatexchange.version>
   </properties>
-  <repositories>
-    <repository>
-      <id>Tunaki-mvn-repo</id>
-      <url>https://raw.github.com/Tunaki/chatexchange/mvn-repo/</url>
-      <snapshots>
-        <enabled>true</enabled>
-        <updatePolicy>always</updatePolicy>
-      </snapshots>
-    </repository>
-  </repositories>
   <dependencies>
     <dependency>
       <groupId>org.sobotics</groupId>
